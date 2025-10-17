@@ -1,6 +1,138 @@
 // The Swift Programming Language
 // https://docs.swift.org/swift-book
+import Foundation
 
+public extension String {
+    
+    func localized(using tableName: String?) -> String {
+        return localized(using: tableName, in: .main)
+    }
+    
+    func localizedFormat(arguments: CVarArg..., using tableName: String?) -> String {
+        return String(format: localized(using: tableName), arguments: arguments)
+    }
+    func localizedPlural(argument: CVarArg, using tableName: String?) -> String {
+        return NSString.localizedStringWithFormat(localized(using: tableName) as NSString, argument) as String
+    }
+    func localized(using tableName: String?, in bundle: Bundle?) -> String {
+            let bundle: Bundle = bundle ?? .main
+            if let path = bundle.path(forResource: Localize.currentLanguage(), ofType: "lproj"),
+                let bundle = Bundle(path: path) {
+                return bundle.localizedString(forKey: self, value: nil, table: tableName)
+            }
+            else if let path = bundle.path(forResource: LCLBaseBundle, ofType: "lproj"),
+                let bundle = Bundle(path: path) {
+                return bundle.localizedString(forKey: self, value: nil, table: tableName)
+            }
+            return self
+        }
+        func localizedFormat(arguments: CVarArg..., using tableName: String?, in bundle: Bundle?) -> String {
+            return String(format: localized(using: tableName, in: bundle), arguments: arguments)
+        }
+        func localizedPlural(argument: CVarArg, using tableName: String?, in bundle: Bundle?) -> String {
+            return NSString.localizedStringWithFormat(localized(using: tableName, in: bundle) as NSString, argument) as String
+        }
+    func localized(in bundle: Bundle?) -> String {
+        return localized(using: nil, in: bundle)
+    }
+    func localizedFormat(arguments: CVarArg..., in bundle: Bundle?) -> String {
+        return String(format: localized(in: bundle), arguments: arguments)
+    }
+    func localizedPlural(argument: CVarArg, in bundle: Bundle?) -> String {
+        return NSString.localizedStringWithFormat(localized(in: bundle) as NSString, argument) as String
+    }
+}
+let LCLCurrentLanguageKey = "LCLCurrentLanguageKey"
+let LCLDefaultLanguage = "en"
+let LCLBaseBundle = "Base"
+public let LCLLanguageChangeNotification = "LCLLanguageChangeNotification"
+public func Localized(_ string: String) -> String {
+    return string.localized()
+}
+public func Localized(_ string: String, arguments: CVarArg...) -> String {
+    return String(format: string.localized(), arguments: arguments)
+}
+public func LocalizedPlural(_ string: String, argument: CVarArg) -> String {
+    return string.localizedPlural(argument)
+}
+public extension String {
+    func localized() -> String {
+        return localized(using: nil, in: .main)
+    }
+    func localizedFormat(_ arguments: CVarArg...) -> String {
+        return String(format: localized(), arguments: arguments)
+    }
+    
+    /**
+     Swift 2 friendly plural localization syntax with a format argument
+     
+     - parameter argument: Argument to determine pluralisation
+     
+     - returns: Pluralized localized string.
+     */
+    func localizedPlural(_ argument: CVarArg) -> String {
+        return NSString.localizedStringWithFormat(localized() as NSString, argument) as String
+    }
+
+    /**
+     Add comment for NSLocalizedString
+     - Returns: The localized string.
+    */
+    func commented(_ argument: String) -> String {
+        return self
+    }
+}
+
+open class Localize: NSObject {
+    open class func availableLanguages(_ excludeBase: Bool = false) -> [String] {
+        var availableLanguages = Bundle.main.localizations
+        // If excludeBase = true, don't include "Base" in available languages
+        if let indexOfBase = availableLanguages.firstIndex(of: "Base") , excludeBase == true {
+            availableLanguages.remove(at: indexOfBase)
+        }
+        return availableLanguages
+    }
+    open class func currentLanguage() -> String {
+        if let currentLanguage = UserDefaults.standard.object(forKey: LCLCurrentLanguageKey) as? String {
+            return currentLanguage
+        }
+        return defaultLanguage()
+    }
+    open class func setCurrentLanguage(_ language: String) {
+        let selectedLanguage = availableLanguages().contains(language) ? language : defaultLanguage()
+        if (selectedLanguage != currentLanguage()){
+            UserDefaults.standard.set(selectedLanguage, forKey: LCLCurrentLanguageKey)
+            UserDefaults.standard.synchronize()
+            NotificationCenter.default.post(name: Notification.Name(rawValue: LCLLanguageChangeNotification), object: nil)
+        }
+    }
+    open class func defaultLanguage() -> String {
+        var defaultLanguage: String = String()
+        guard let preferredLanguage = Bundle.main.preferredLocalizations.first else {
+            return LCLDefaultLanguage
+        }
+        let availableLanguages: [String] = self.availableLanguages()
+        if (availableLanguages.contains(preferredLanguage)) {
+            defaultLanguage = preferredLanguage
+        }
+        else {
+            defaultLanguage = LCLDefaultLanguage
+        }
+        return defaultLanguage
+    }
+    open class func resetCurrentLanguageToDefault() {
+        setCurrentLanguage(self.defaultLanguage())
+    }
+    open class func displayNameForLanguage(_ language: String) -> String {
+        let locale : NSLocale = NSLocale(localeIdentifier: currentLanguage())
+        if let displayName = locale.displayName(forKey: NSLocale.Key.identifier, value: language) {
+            return displayName
+        }
+        return String()
+    }
+}
+
+//MARK: - Usage Functions
 import Foundation
 #if os(iOS)
 import UIKit
