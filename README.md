@@ -2,14 +2,15 @@
 
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-brightgreen.svg)](https://swift.org/package-manager/)
 
-A Swift Package Manager (SPM) library for easy localization of your iOS app's UI. Automatically localizes view hierarchies by replacing text with localized strings.
+A Swift Package Manager (SPM) library for easy localization of your iOS or MacOS app's UI. Automatically localizes view hierarchies by replacing text with localized strings.
 
 ## Features
 
 - ✅ Reset view hierarchy to original English keys
 - ✅ Set current language from UserDefaults or any string
 - ✅ Automatically localize entire view hierarchy
-- ✅ Supports UILabel, UIButton, UITextField, UITextView and more
+- ✅ Supports UILabel, UIButton, UITextField, UICollectionView and UISegmentedControl
+- ✅ Supports NSTextField (and its PlaceHolder Text also), NSButton, NSCollectionView and NSSegmentedControl
 - ✅ Lightweight and easy to integrate
 
 ## Installation
@@ -61,8 +62,9 @@ func changeLanguage() {
 The library automatically localizes:
 - `UILabel` or `NSTextField`
 - `UIButton` (title) or `NSButton`
+- `UISegmentedControl` or `NSSegmentedControl`  ✅ *(newly added — all segments localized)*
 - `UITextField` (placeholder)  or `NSTextField` (placeholder)
-- `UITextView` not Suppourted Yet (working on future)
+- `UITextView` or `NSTextView` not Suppourted Yet (working on future)
 - `UICollectionView` or `NSCollectionView`(reload only) ---> just simply add .localized() after your cell label,button,textfield string
 - Custom views with `text` or `title` properties
 
@@ -98,9 +100,9 @@ override func viewDidLoad() {
 }
 
 private func applyLocalization() {
-    LocalizationUtility.resetToLocalizationKeys(view: self.view)
+    LocalizationUtility.resetToLocalizationKeys(view: view)
     Localize.setCurrentLanguage(AppDefaults.shared.appLanguage)
-    LocalizationUtility.localizeViewHierarchy(view: self.view)
+    LocalizationUtility.localizeViewHierarchy(view: view)
 }
 ```
 
