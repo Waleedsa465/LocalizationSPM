@@ -39,6 +39,13 @@ open class LocalizationUtility: NSObject {
                 textField.placeholder = placeholder.localized()
             }else if let collection = subview as? UICollectionView{
                 collection.reloadData()
+            }else if let segment = subview as? UISegmentedControl{
+                for index in 0..<segment.numberOfSegments {
+                    if let title = segment.titleForSegment(at: index) {
+                        segment.localizationKey = title
+                        segment.setTitle(title.localized(), forSegmentAt: index)
+                    }
+                }
             }
             localizeViewHierarchy(view: subview)
         }
@@ -53,6 +60,12 @@ open class LocalizationUtility: NSObject {
                 textField.placeholder = key
             }else if let collection = subview as? UICollectionView{
                 collection.reloadData()
+            }else if let segment = subview as? UISegmentedControl {
+                for index in 0..<segment.numberOfSegments {
+                    if let key = segment.localizationKey {
+                        segment.setTitle(key, forSegmentAt: index)
+                    }
+                }
             }
             resetToLocalizationKeys(view: subview)
         }
@@ -93,6 +106,13 @@ open class LocalizationUtility: NSObject {
                 textField.placeholderString = placeholder.localized()
             }else if let collection = subview as? NSCollectionView{
                 collection.reloadData()
+            }else if let segment = subview as? NSSegmentedControl {
+                for index in 0..<segment.segmentCount {
+                    if let title = segment.label(forSegment: index){
+                        segment.localizationKey = title
+                        segment.setLabel(title.localized(), forSegment: index)
+                    }
+                }
             }
             localizeViewHierarchy(view: subview)
         }
@@ -107,6 +127,12 @@ open class LocalizationUtility: NSObject {
                 textField.placeholderString = key
             }else if let collection = subview as? NSCollectionView{
                 collection.reloadData()
+            }else if let segment = subview as? NSSegmentedControl {
+                for index in 0..<segment.segmentCount {
+                    if let key = segment.localizationKey {
+                        segment.setLabel(key, forSegment: index)
+                    }
+                }
             }
             resetToLocalizationKeys(view: subview)
         }
