@@ -49,9 +49,12 @@ open class LocalizationUtility: NSObject {
             }else if let tabbar = subview as? UITabBar{
                 if let items = tabbar.items{
                     let keys = tabbar.localizationKeys
+                    print(keys)
                     for index in 0..<items.count{
                         if let key = keys[safe: index] {
+                            print(key ?? "No Key Found Localization")
                             items[index].title = key?.localized()
+                            print(items[index].title ?? "Empty Found Tab bar")
                         }
                     }
                 }
