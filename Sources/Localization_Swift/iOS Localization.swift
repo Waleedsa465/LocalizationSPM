@@ -62,8 +62,8 @@ open class LocalizationUtility: NSObject {
                 collection.reloadData()
             }else if let segment = subview as? UISegmentedControl {
                 for index in 0..<segment.numberOfSegments {
-                    if let title = segment.titleForSegment(at: index) ,let key = segment.localizationKey{
-                        segment.setTitle(key, forSegmentAt: index)
+                    if let title = segment.titleForSegment(at: index){
+                        segment.setTitle(title, forSegmentAt: index)
                     }
                 }
             }
