@@ -65,27 +65,29 @@ open class LocalizationUtility: NSObject {
                     }
                 }
             }
-            // Tab Bar (now fully working inside recursion)
             else if let tabBar = subview as? UITabBar, let items = tabBar.items, !items.isEmpty {
                 var keys = tabBar.localizationKeys
+                print("TabBar Localization Keys: \(keys)")
                 
                 // Save original titles ONLY if empty (first time)
                 if keys.isEmpty {
                     keys = items.map { $0.title ?? "" }
                     tabBar.localizationKeys = keys
+                    print("TabBar Keys saved: \(keys)")
                 }
                 
                 // Apply localized titles
                 for index in 0..<items.count {
                     if let key = keys[safe: index], let localized = key?.localized() {
+                        print("TabBar item \(index) localizing title: \(key) -> localized: \(localized)")
                         items[index].title = localized
                     }
                 }
                 
                 // Force tab bar to redraw (critical!)
-                tabBar.setNeedsDisplay()
                 tabBar.setNeedsLayout()
                 tabBar.layoutIfNeeded()
+                print("TabBar layout updated")
             }
             
             localizeViewHierarchy(view: subview)
@@ -113,17 +115,17 @@ open class LocalizationUtility: NSObject {
                     }
                 }
             }
-            // Tab Bar reset
             else if let tabBar = subview as? UITabBar, let items = tabBar.items {
                 let keys = tabBar.localizationKeys
                 for index in 0..<items.count {
                     if let key = keys[safe: index] {
+                        print("Resetting TabBar item \(index) with key: \(key)")
                         items[index].title = key
                     }
                 }
-                tabBar.setNeedsDisplay()
                 tabBar.setNeedsLayout()
                 tabBar.layoutIfNeeded()
+                print("TabBar layout updated")
             }
             
             resetToLocalizationKeys(view: subview)
