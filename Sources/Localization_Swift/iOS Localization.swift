@@ -11,7 +11,6 @@ import ObjectiveC
 import UIKit
 
 nonisolated(unsafe) public var localizationKeyAssociatedObjectKey: UInt8 = 0
-nonisolated(unsafe) public var localizationKeyAssociatedObjectKeyTabBar: UInt8 = 0
 nonisolated(unsafe) public var localizationKeysAssociatedObjectKey: UInt8 = 0
 
 extension UIView {
@@ -88,48 +87,55 @@ extension UISegmentedControl {
     }
 }
 // MARK: - UiTabbarController
-extension UITabBarItem {
-    var localizationKey: String? {
+extension UITabBar {
+    var localizationKeys: [String?] {
         get {
-            return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKeyTabBar) as? String
+            return objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? []
         }
         set {
-            objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKeyTabBar, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
-
 }
 
 extension LocalizationUtility {
+    
     @MainActor
     public class func localizeTabBarItems(in tabBarController: UITabBarController?) {
-        guard let items = tabBarController?.tabBar.items, !items.isEmpty else {
+        guard let tabBar = tabBarController?.tabBar,
+              let items = tabBar.items, !items.isEmpty else {
             return
         }
-        for item in items {
-            if item.localizationKey == nil {
-                item.localizationKey = item.title ?? ""
-            }
-            if let key = item.localizationKey, !key.isEmpty {
-                item.title = key.localized()
+        
+        var keys = tabBar.localizationKeys
+        if keys.isEmpty {
+            keys = items.map { $0.title }
+            tabBar.localizationKeys = keys
+        }
+        for (index, item) in items.enumerated() {
+            if let key = keys[safe: index], let localized = key?.localized(), !localized.isEmpty {
+                item.title = localized
             }
         }
-        tabBarController?.tabBar.setNeedsLayout()
-        tabBarController?.tabBar.layoutIfNeeded()
+        tabBar.setNeedsLayout()
+        tabBar.layoutIfNeeded()
     }
     
     @MainActor
     public class func resetTabBarItemsToKeys(in tabBarController: UITabBarController?) {
-        guard let items = tabBarController?.tabBar.items else {
+        guard let tabBar = tabBarController?.tabBar,
+              let items = tabBar.items else {
             return
         }
-        for item in items {
-            if let key = item.localizationKey {
+        
+        let keys = tabBar.localizationKeys
+        for (index, item) in items.enumerated() {
+            if let key = keys[safe: index] {
                 item.title = key
             }
         }
-        tabBarController?.tabBar.setNeedsLayout()
-        tabBarController?.tabBar.layoutIfNeeded()
+        tabBar.setNeedsLayout()
+        tabBar.layoutIfNeeded()
     }
 }
 #endif
