@@ -12,6 +12,7 @@ import UIKit
 
 nonisolated(unsafe) public var localizationKeyAssociatedObjectKey: UInt8 = 0
 nonisolated(unsafe) public var localizationKeyAssociatedObjectKeyTabBar: UInt8 = 0
+nonisolated(unsafe) public var localizationKeysAssociatedObjectKey: UInt8 = 0
 
 extension UIView {
     var localizationKey: String? {
@@ -39,11 +40,11 @@ open class LocalizationUtility: NSObject {
                 textField.placeholder = placeholder.localized()
             }else if let collection = subview as? UICollectionView{
                 collection.reloadData()
-            }else if let segment = subview as? UISegmentedControl{
+            }else if let segment = subview as? UISegmentedControl {
+                let keys = segment.localizationKeys
                 for index in 0..<segment.numberOfSegments {
-                    if let title = segment.titleForSegment(at: index) {
-                        segment.localizationKey = title
-                        segment.setTitle(title.localized(), forSegmentAt: index)
+                    if let key = keys[safe: index] {  // Use optional safe index if needed (add extension below)
+                        segment.setTitle(key, forSegmentAt: index)
                     }
                 }
             }
@@ -61,13 +62,30 @@ open class LocalizationUtility: NSObject {
             }else if let collection = subview as? UICollectionView{
                 collection.reloadData()
             }else if let segment = subview as? UISegmentedControl {
+                var keys = segment.localizationKeys
+                if keys.isEmpty {
+                    // Save original keys only once
+                    keys = (0..<segment.numberOfSegments).map { segment.titleForSegment(at: $0) }
+                    segment.localizationKeys = keys
+                }
+                // Apply localization
                 for index in 0..<segment.numberOfSegments {
-                    if let title = segment.titleForSegment(at: index){
-                        segment.setTitle(title, forSegmentAt: index)
+                    if let key = keys[index] {
+                        segment.setTitle(key.localized(), forSegmentAt: index)
                     }
                 }
             }
             resetToLocalizationKeys(view: subview)
+        }
+    }
+}
+extension UISegmentedControl {
+    var localizationKeys: [String?] {
+        get {
+            return objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? []
+        }
+        set {
+            objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }
@@ -108,3 +126,8 @@ extension LocalizationUtility {
     }
 }
 #endif
+extension Array {
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
+    }
+}
