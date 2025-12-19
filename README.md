@@ -11,6 +11,7 @@ A Swift Package Manager (SPM) library for easy localization of your iOS or MacOS
 - ✅ Automatically localize entire view hierarchy
 - ✅ Supports UILabel, UIButton, UITextField, UICollectionView and UISegmentedControl
 - ✅ Supports NSTextField (and its PlaceHolder Text also), NSButton, NSCollectionView and NSSegmentedControl
+- ✅ **Supports UITabBarItem titles** (Tab Bar localization)
 - ✅ Lightweight and easy to integrate
 
 ## Installation
@@ -26,6 +27,7 @@ A Swift Package Manager (SPM) library for easy localization of your iOS or MacOS
 ### Step 1: Reset to Original English Keys
 ```swift
 LocalizationUtility.resetToLocalizationKeys(view: view)
+LocalizationUtility.resetTabBarItemsToKeys(in: yourtabBarController) --> If any tabbar use
 ```
 Resets all localized text back to their original English localization keys.
 
@@ -38,6 +40,7 @@ Sets the current language. Use your stored language preference (e.g., from UserD
 ### Step 3: Localize View Hierarchy
 ```swift
 LocalizationUtility.localizeViewHierarchy(view: view)
+LocalizationUtility.localizeTabBarItems(view: yourtabBarController)  --> If any tabbar use
 ```
 Automatically localizes the entire view hierarchy using the set language.
 
@@ -48,12 +51,14 @@ Automatically localizes the entire view hierarchy using the set language.
 func changeLanguage() {
     // 1. Reset to English keys first
     LocalizationUtility.resetToLocalizationKeys(view: view)
+    LocalizationUtility.resetTabBarItemsToKeys(in: yourtabBarController)
     
     // 2. Set the new language (stored in UserDefaults)
     Localize.setCurrentLanguage(AppDefaults.shared.appLanguage)
     
     // 3. Localize the entire view hierarchy
     LocalizationUtility.localizeViewHierarchy(view: view)
+    LocalizationUtility.localizeTabBarItems(view: yourtabBarController)
 }
 ```
 
@@ -66,6 +71,7 @@ The library automatically localizes:
 - `UITextField` (placeholder)  or `NSTextField` (placeholder)
 - `UITextView` or `NSTextView` not Suppourted Yet (working on future)
 - `UICollectionView` or `NSCollectionView`(reload only) ---> just simply add .localized() after your cell label,button,textfield string
+- `Supports UITabBarItem titles` (Tab Bar localization)
 - Custom views with `text` or `title` properties
 
 ## Setup Requirements

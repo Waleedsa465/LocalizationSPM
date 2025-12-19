@@ -8,70 +8,7 @@
 import Foundation
 // MARK: - IoS and MacOS Localization Code Format
 import ObjectiveC
-#if os(iOS)
-import UIKit
-
-nonisolated(unsafe) public var localizationKeyAssociatedObjectKey: UInt8 = 0
-
-extension UIView {
-    var localizationKey: String? {
-        get {
-            return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String
-        }
-        set {
-            objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-}
-
-open class LocalizationUtility: NSObject {
-    public override init() {}
-    @MainActor open class func localizeViewHierarchy(view: UIView) {
-        for subview in view.subviews {
-            if let label = subview as? UILabel, let text = label.text {
-                label.localizationKey = text
-                label.text = text.localized()
-            } else if let button = subview as? UIButton, let text = button.title(for: .normal) {
-                button.localizationKey = text
-                button.setTitle(text.localized(), for: .normal)
-            } else if let textField = subview as? UITextField, let placeholder = textField.placeholder {
-                textField.localizationKey = placeholder
-                textField.placeholder = placeholder.localized()
-            }else if let collection = subview as? UICollectionView{
-                collection.reloadData()
-            }else if let segment = subview as? UISegmentedControl{
-                for index in 0..<segment.numberOfSegments {
-                    if let title = segment.titleForSegment(at: index) {
-                        segment.localizationKey = title
-                        segment.setTitle(title.localized(), forSegmentAt: index)
-                    }
-                }
-            }
-            localizeViewHierarchy(view: subview)
-        }
-    }
-    @MainActor open class func resetToLocalizationKeys(view: UIView) {
-        for subview in view.subviews {
-            if let label = subview as? UILabel, let key = label.localizationKey {
-                label.text = key
-            } else if let button = subview as? UIButton, let key = button.localizationKey {
-                button.setTitle(key, for: .normal)
-            } else if let textField = subview as? UITextField, let key = textField.localizationKey {
-                textField.placeholder = key
-            }else if let collection = subview as? UICollectionView{
-                collection.reloadData()
-            }else if let segment = subview as? UISegmentedControl {
-                for index in 0..<segment.numberOfSegments {
-                    if let key = segment.localizationKey {
-                        segment.setTitle(key, forSegmentAt: index)
-                    }
-                }
-            }
-            resetToLocalizationKeys(view: subview)
-        }
-    }
-}
-#elseif os(macOS)
+#if os(macOS)
 import AppKit
 
 nonisolated(unsafe) public var localizationKeyAssociatedObjectKey: UInt8 = 0
