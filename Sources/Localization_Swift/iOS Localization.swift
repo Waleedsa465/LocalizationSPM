@@ -72,16 +72,16 @@ open class LocalizationUtility: NSObject {
 }
 // MARK: - UiTabbarController
 extension UITabBarItem {
-    private static var localizationKeyAssociatedObjectKey: UInt8 = 0
-    
+//    private var localizationKeyAssociatedObjectKey: UInt8 = 0
     var localizationKey: String? {
         get {
-            return objc_getAssociatedObject(self, &Self.localizationKeyAssociatedObjectKey) as? String
+            return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String
         }
         set {
-            objc_setAssociatedObject(self, &Self.localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
+
 }
 
 extension LocalizationUtility {
