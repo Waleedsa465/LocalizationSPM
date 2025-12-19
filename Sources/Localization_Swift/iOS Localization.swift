@@ -47,7 +47,7 @@ open class LocalizationUtility: NSObject {
                     }
                 }
             }else if let tabbar = subview as? UITabBar{
-                print(tabbar,"tabbar")
+                print(tabbar,"tabbar",tabbar.items?.count)
             }
             localizeViewHierarchy(view: subview)
         }
