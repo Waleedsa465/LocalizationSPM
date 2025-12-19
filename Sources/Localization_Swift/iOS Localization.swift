@@ -97,45 +97,67 @@ extension UITabBar {
         }
     }
 }
-
 extension LocalizationUtility {
     
     @MainActor
     public class func localizeTabBarItems(in tabBarController: UITabBarController?) {
-        guard let tabBar = tabBarController?.tabBar,
-              let items = tabBar.items, !items.isEmpty else {
-            return
-        }
-        
+        guard let tabBarController = tabBarController,
+              let items = tabBarController.tabBar.items,
+              !items.isEmpty else { return }
+        let tabBar = tabBarController.tabBar
         var keys = tabBar.localizationKeys
         if keys.isEmpty {
             keys = items.map { $0.title }
             tabBar.localizationKeys = keys
         }
-        for (index, item) in items.enumerated() {
+        var updatedItems = items
+        for (index, item) in updatedItems.enumerated() {
             if let key = keys[safe: index], let localized = key?.localized(), !localized.isEmpty {
                 item.title = localized
             }
         }
-        tabBar.setNeedsLayout()
-        tabBar.layoutIfNeeded()
+        tabBarController.tabBar.items = updatedItems
+        
+        if #available(iOS 13.0, *) {
+            Task{ @MainActor in
+                tabBar.setNeedsLayout()
+                tabBar.layoutIfNeeded()
+            }
+        } else {
+            DispatchQueue.main.async{
+                tabBar.setNeedsLayout()
+                tabBar.layoutIfNeeded()
+            }
+        }
     }
     
     @MainActor
     public class func resetTabBarItemsToKeys(in tabBarController: UITabBarController?) {
-        guard let tabBar = tabBarController?.tabBar,
-              let items = tabBar.items else {
-            return
-        }
-        
+        guard let tabBarController = tabBarController,
+              let items = tabBarController.tabBar.items else { return }
+        let tabBar = tabBarController.tabBar
         let keys = tabBar.localizationKeys
-        for (index, item) in items.enumerated() {
+        var updatedItems = items
+        for (index, item) in updatedItems.enumerated() {
             if let key = keys[safe: index] {
                 item.title = key
             }
         }
-        tabBar.setNeedsLayout()
-        tabBar.layoutIfNeeded()
+        
+        // Critical: Set back to controller
+        tabBarController.tabBar.items = updatedItems
+
+        if #available(iOS 13.0, *) {
+            Task{ @MainActor in
+                tabBar.setNeedsLayout()
+                tabBar.layoutIfNeeded()
+            }
+        } else {
+            DispatchQueue.main.async{
+                tabBar.setNeedsLayout()
+                tabBar.layoutIfNeeded()
+            }
+        }
     }
 }
 #endif
