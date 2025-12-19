@@ -87,22 +87,33 @@ extension UITabBarItem {
 extension LocalizationUtility {
     @MainActor
     public class func localizeTabBarItems(in tabBarController: UITabBarController?) {
-        for viewController in tabBarController?.viewControllers ?? [] {
-            guard let tabBarItem = viewController.tabBarItem,
-                  let title = tabBarItem.title else { continue }
-            
-            tabBarItem.localizationKey = title
-            tabBarItem.title = title.localized()
+//        for viewController in tabBarController?.viewControllers ?? [] {
+//            guard let tabBarItem = viewController.tabBarItem,
+//                  let title = tabBarItem.title else { continue }
+//            
+//            tabBarItem.localizationKey = title
+//            tabBarItem.title = title.localized()
+//        }
+        tabBarController?.tabBar.items?.forEach { item in
+            if let title = item.title {
+                item.localizationKey = title
+                item.title = title.localized()
+            }
         }
     }
     
     @MainActor
     public class func resetTabBarItemsToKeys(in tabBarController: UITabBarController?) {
-        for viewController in tabBarController?.viewControllers ?? [] {
-            guard let tabBarItem = viewController.tabBarItem,
-                  let key = tabBarItem.localizationKey else { continue }
-            
-            tabBarItem.title = key
+//        for viewController in tabBarController?.viewControllers ?? [] {
+//            guard let tabBarItem = viewController.tabBarItem,
+//                  let key = tabBarItem.localizationKey else { continue }
+//            
+//            tabBarItem.title = key
+//        }
+        tabBarController?.tabBar.items?.forEach { item in
+            if let title = item.localizationKey {
+                item.title = title
+            }
         }
     }
 }
