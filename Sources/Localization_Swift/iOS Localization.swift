@@ -46,6 +46,8 @@ open class LocalizationUtility: NSObject {
                         segment.setTitle(key, forSegmentAt: index)
                     }
                 }
+            }else if let tabbar = subview as? UITabBar{
+                print(tabbar,"tabbar")
             }
             localizeViewHierarchy(view: subview)
         }
@@ -101,63 +103,40 @@ extension LocalizationUtility {
     
     @MainActor
     public class func localizeTabBarItems(in tabBarController: UITabBarController?) {
-        guard let tabBarController = tabBarController,
-              let items = tabBarController.tabBar.items,
-              !items.isEmpty else { return }
-        let tabBar = tabBarController.tabBar
+        guard let tabBar = tabBarController?.tabBar,
+              let items = tabBar.items, !items.isEmpty else {
+            return
+        }
+        
         var keys = tabBar.localizationKeys
         if keys.isEmpty {
             keys = items.map { $0.title }
             tabBar.localizationKeys = keys
         }
-        var updatedItems = items
-        for (index, item) in updatedItems.enumerated() {
+        for (index, item) in items.enumerated() {
             if let key = keys[safe: index], let localized = key?.localized(), !localized.isEmpty {
                 item.title = localized
             }
         }
-        tabBarController.tabBar.items = updatedItems
-        
-        if #available(iOS 13.0, *) {
-            Task{ @MainActor in
-                tabBar.setNeedsLayout()
-                tabBar.layoutIfNeeded()
-            }
-        } else {
-            DispatchQueue.main.async{
-                tabBar.setNeedsLayout()
-                tabBar.layoutIfNeeded()
-            }
-        }
+        tabBar.setNeedsLayout()
+        tabBar.layoutIfNeeded()
     }
     
     @MainActor
     public class func resetTabBarItemsToKeys(in tabBarController: UITabBarController?) {
-        guard let tabBarController = tabBarController,
-              let items = tabBarController.tabBar.items else { return }
-        let tabBar = tabBarController.tabBar
+        guard let tabBar = tabBarController?.tabBar,
+              let items = tabBar.items else {
+            return
+        }
+        
         let keys = tabBar.localizationKeys
-        var updatedItems = items
-        for (index, item) in updatedItems.enumerated() {
+        for (index, item) in items.enumerated() {
             if let key = keys[safe: index] {
                 item.title = key
             }
         }
-        
-        // Critical: Set back to controller
-        tabBarController.tabBar.items = updatedItems
-
-        if #available(iOS 13.0, *) {
-            Task{ @MainActor in
-                tabBar.setNeedsLayout()
-                tabBar.layoutIfNeeded()
-            }
-        } else {
-            DispatchQueue.main.async{
-                tabBar.setNeedsLayout()
-                tabBar.layoutIfNeeded()
-            }
-        }
+        tabBar.setNeedsLayout()
+        tabBar.layoutIfNeeded()
     }
 }
 #endif
