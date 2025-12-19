@@ -11,6 +11,7 @@ import ObjectiveC
 import UIKit
 
 nonisolated(unsafe) public var localizationKeyAssociatedObjectKey: UInt8 = 0
+nonisolated(unsafe) public var localizationKeyAssociatedObjectKeyTabBar: UInt8 = 0
 
 extension UIView {
     var localizationKey: String? {
@@ -74,10 +75,10 @@ open class LocalizationUtility: NSObject {
 extension UITabBarItem {
     var localizationKey: String? {
         get {
-            return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String
+            return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKeyTabBar) as? String
         }
         set {
-            objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+            objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKeyTabBar, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 
