@@ -15,54 +15,85 @@ nonisolated(unsafe) public var localizationKeysAssociatedObjectKey: UInt8 = 0
 
 extension UIView {
     var localizationKey: String? {
-        get {
-            return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String
-        }
-        set {
-            objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
+        get { objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String }
+        set { objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+}
+
+extension UISegmentedControl {
+    var localizationKeys: [String?] {
+        get { objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? [] }
+        set { objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+    }
+}
+
+extension UITabBar {
+    var localizationKeys: [String?] {
+        get { objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? [] }
+        set { objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
 }
 
 open class LocalizationUtility: NSObject {
     public override init() {}
-    @MainActor open class func localizeViewHierarchy(view: UIView) {
+    
+    @MainActor
+    open class func localizeViewHierarchy(view: UIView) {
         for subview in view.subviews {
-            if let label = subview as? UILabel, let text = label.text {
+            if let label = subview as? UILabel, let text = label.text, !text.isEmpty {
                 label.localizationKey = text
                 label.text = text.localized()
-            } else if let button = subview as? UIButton, let text = button.title(for: .normal) {
+            } else if let button = subview as? UIButton, let text = button.title(for: .normal), !text.isEmpty {
                 button.localizationKey = text
                 button.setTitle(text.localized(), for: .normal)
-            } else if let textField = subview as? UITextField, let placeholder = textField.placeholder {
+            } else if let textField = subview as? UITextField, let placeholder = textField.placeholder, !placeholder.isEmpty {
                 textField.localizationKey = placeholder
                 textField.placeholder = placeholder.localized()
-            }else if let collection = subview as? UICollectionView{
+            } else if let collection = subview as? UICollectionView {
                 collection.reloadData()
-            }else if let segment = subview as? UISegmentedControl {
-                let keys = segment.localizationKeys
-                for index in 0..<segment.numberOfSegments {
-                    if let key = keys[safe: index] {
-                        segment.setTitle(key?.localized(), forSegmentAt: index)
-                    }
+            }
+            // Segmented Control
+            else if let segment = subview as? UISegmentedControl {
+                var keys = segment.localizationKeys
+                if keys.isEmpty {
+                    keys = (0..<segment.numberOfSegments).map { segment.titleForSegment(at: $0) ?? "" }
+                    segment.localizationKeys = keys
                 }
-            }else if let tabbar = subview as? UITabBar{
-                if let items = tabbar.items{
-                    let keys = tabbar.localizationKeys
-                    print(keys)
-                    for index in 0..<items.count{
-                        if let key = keys[safe: index] {
-                            print(key ?? "No Key Found Localization")
-                            items[index].title = key?.localized()
-                            print(items[index].title ?? "Empty Found Tab bar")
-                        }
+                for index in 0..<segment.numberOfSegments {
+                    if let key = keys[safe: index], let localized = key?.localized() {
+                        segment.setTitle(localized, forSegmentAt: index)
                     }
                 }
             }
+            // Tab Bar (now fully working inside recursion)
+            else if let tabBar = subview as? UITabBar, let items = tabBar.items, !items.isEmpty {
+                var keys = tabBar.localizationKeys
+                
+                // Save original titles ONLY if empty (first time)
+                if keys.isEmpty {
+                    keys = items.map { $0.title ?? "" }
+                    tabBar.localizationKeys = keys
+                }
+                
+                // Apply localized titles
+                for index in 0..<items.count {
+                    if let key = keys[safe: index], let localized = key?.localized() {
+                        items[index].title = localized
+                    }
+                }
+                
+                // Force tab bar to redraw (critical!)
+                tabBar.setNeedsDisplay()
+                tabBar.setNeedsLayout()
+                tabBar.layoutIfNeeded()
+            }
+            
             localizeViewHierarchy(view: subview)
         }
     }
-    @MainActor open class func resetToLocalizationKeys(view: UIView) {
+    
+    @MainActor
+    open class func resetToLocalizationKeys(view: UIView) {
         for subview in view.subviews {
             if let label = subview as? UILabel, let key = label.localizationKey {
                 label.text = key
@@ -70,51 +101,32 @@ open class LocalizationUtility: NSObject {
                 button.setTitle(key, for: .normal)
             } else if let textField = subview as? UITextField, let key = textField.localizationKey {
                 textField.placeholder = key
-            }else if let collection = subview as? UICollectionView{
+            } else if let collection = subview as? UICollectionView {
                 collection.reloadData()
-            }else if let segment = subview as? UISegmentedControl {
-                var keys = segment.localizationKeys
-                if keys.isEmpty {
-                    keys = (0..<segment.numberOfSegments).map { segment.titleForSegment(at: $0) }
-                    segment.localizationKeys = keys
-                }
+            }
+            // Segmented Control reset
+            else if let segment = subview as? UISegmentedControl {
+                let keys = segment.localizationKeys
                 for index in 0..<segment.numberOfSegments {
-                    if let key = keys[index] {
+                    if let key = keys[safe: index] {
                         segment.setTitle(key, forSegmentAt: index)
                     }
                 }
-            }else if let tabbar = subview as? UITabBar{
-                if let items = tabbar.items{
-                    let keys = tabbar.localizationKeys
-                    for index in 0..<items.count{
-                        if let key = keys[safe: index] {
-                            items[index].title = key
-                        }
+            }
+            // Tab Bar reset
+            else if let tabBar = subview as? UITabBar, let items = tabBar.items {
+                let keys = tabBar.localizationKeys
+                for index in 0..<items.count {
+                    if let key = keys[safe: index] {
+                        items[index].title = key
                     }
                 }
+                tabBar.setNeedsDisplay()
+                tabBar.setNeedsLayout()
+                tabBar.layoutIfNeeded()
             }
+            
             resetToLocalizationKeys(view: subview)
-        }
-    }
-}
-extension UISegmentedControl {
-    var localizationKeys: [String?] {
-        get {
-            return objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? []
-        }
-        set {
-            objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-}
-// MARK: - UiTabbarController
-extension UITabBar {
-    var localizationKeys: [String?] {
-        get {
-            return objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? []
-        }
-        set {
-            objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }
