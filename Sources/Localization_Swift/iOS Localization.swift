@@ -78,9 +78,9 @@ open class LocalizationUtility: NSObject {
                 
                 // Apply localized titles
                 for index in 0..<items.count {
-                    if let key = keys[safe: index], let localized = key?.localized() {
-                        print("TabBar item \(index) localizing title: \(key) -> localized: \(localized)")
-                        items[index].title = localized
+                    if let key = keys[safe: index],let key {
+                        print("TabBar item \(index) localizing title: \(key) -> localized: \(key.localized())")
+                        items[index].title = UserDefaultsManager.getEnglishStrings()[index].localized()
                     }
                 }
                 
@@ -116,13 +116,17 @@ open class LocalizationUtility: NSObject {
                 }
             }
             else if let tabBar = subview as? UITabBar, let items = tabBar.items {
-                let keys = tabBar.localizationKeys
+                var keys = tabBar.localizationKeys
+                var titlesArray: [String] = []
+                
                 for index in 0..<items.count {
-                    if let key = keys[safe: index] {
+                    if let key = keys[safe: index],let key {
                         print("Resetting TabBar item \(index) with key: \(key)")
                         items[index].title = key
+                        titlesArray.append(key)
                     }
                 }
+                let _ = UserDefaultsManager.saveEnglishStrings(titlesArray)
                 tabBar.setNeedsLayout()
                 tabBar.layoutIfNeeded()
                 print("TabBar layout updated")
