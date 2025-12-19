@@ -80,7 +80,7 @@ open class LocalizationUtility: NSObject {
                 for index in 0..<items.count {
                     if let key = keys[safe: index],let key {
                         print("TabBar item \(index) localizing title: \(key) -> localized: \(key.localized())")
-                        items[index].title = UserDefaultsManager.getEnglishStrings()[index].localized()
+                        items[index].title = key.localized()
                     }
                 }
                 
@@ -126,7 +126,6 @@ open class LocalizationUtility: NSObject {
                         titlesArray.append(key)
                     }
                 }
-                let _ = UserDefaultsManager.saveEnglishStrings(titlesArray)
                 tabBar.setNeedsLayout()
                 tabBar.layoutIfNeeded()
                 print("TabBar layout updated")
