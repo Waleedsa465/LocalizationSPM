@@ -72,7 +72,6 @@ open class LocalizationUtility: NSObject {
 }
 // MARK: - UiTabbarController
 extension UITabBarItem {
-//    private var localizationKeyAssociatedObjectKey: UInt8 = 0
     var localizationKey: String? {
         get {
             return objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String
@@ -87,33 +86,19 @@ extension UITabBarItem {
 extension LocalizationUtility {
     @MainActor
     public class func localizeTabBarItems(in tabBarController: UITabBarController?) {
-//        for viewController in tabBarController?.viewControllers ?? [] {
-//            guard let tabBarItem = viewController.tabBarItem,
-//                  let title = tabBarItem.title else { continue }
-//            
-//            tabBarItem.localizationKey = title
-//            tabBarItem.title = title.localized()
-//        }
-        tabBarController?.tabBar.items?.forEach { item in
-            if let title = item.title {
-                item.localizationKey = title
-                item.title = title.localized()
-            }
+        let tabbar = tabBarController?.tabBar
+        for (index,items) in (tabbar?.items ?? []).enumerated(){
+            items.localizationKey = tabbar?.items?[index].title
+            items.title = items.title?.localized()
         }
     }
     
     @MainActor
     public class func resetTabBarItemsToKeys(in tabBarController: UITabBarController?) {
-//        for viewController in tabBarController?.viewControllers ?? [] {
-//            guard let tabBarItem = viewController.tabBarItem,
-//                  let key = tabBarItem.localizationKey else { continue }
-//            
-//            tabBarItem.title = key
-//        }
-        tabBarController?.tabBar.items?.forEach { item in
-            if let title = item.localizationKey {
-                item.title = title
-            }
+        let tabbar = tabBarController?.tabBar
+        for (index,items) in (tabbar?.items ?? []).enumerated(){
+            items.localizationKey = tabbar?.items?[index].title
+            items.title = items.localizationKey
         }
     }
 }
