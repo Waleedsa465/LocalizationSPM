@@ -47,7 +47,14 @@ open class LocalizationUtility: NSObject {
                     }
                 }
             }else if let tabbar = subview as? UITabBar{
-                print(tabbar,"tabbar",tabbar.items?.count)
+                if let items = tabbar.items{
+                    let keys = tabbar.localizationKeys
+                    for index in 0..<items.count{
+                        if let key = keys[safe: index] {
+                            items[index].title = key
+                        }
+                    }
+                }
             }
             localizeViewHierarchy(view: subview)
         }
@@ -71,6 +78,15 @@ open class LocalizationUtility: NSObject {
                 for index in 0..<segment.numberOfSegments {
                     if let key = keys[index] {
                         segment.setTitle(key.localized(), forSegmentAt: index)
+                    }
+                }
+            }else if let tabbar = subview as? UITabBar{
+                if let items = tabbar.items{
+                    let keys = tabbar.localizationKeys
+                    for index in 0..<items.count{
+                        if let key = keys[safe: index] {
+                            items[index].title = key?.localized()
+                        }
                     }
                 }
             }
