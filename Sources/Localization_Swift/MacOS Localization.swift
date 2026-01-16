@@ -50,6 +50,8 @@ open class LocalizationUtility: NSObject {
                         segment.setLabel(title.localized(), forSegment: index)
                     }
                 }
+            }else if let tableView = subview as? NSTableView{
+                tableView.reloadVisibleCurrentRows()
             }
             localizeViewHierarchy(view: subview)
         }
@@ -70,6 +72,8 @@ open class LocalizationUtility: NSObject {
                         segment.setLabel(key, forSegment: index)
                     }
                 }
+            }else if let tableView = subview as? NSTableView{
+                tableView.reloadVisibleCurrentRows()
             }
             resetToLocalizationKeys(view: subview)
         }

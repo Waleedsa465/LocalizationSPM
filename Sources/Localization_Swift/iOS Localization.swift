@@ -65,8 +65,13 @@ open class LocalizationUtility: NSObject {
                         segment.setTitle(localized, forSegmentAt: index)
                     }
                 }
+            }else if let tableView = subview as? UITableView{
+                tableView.reloadVisibleCurrentRows()
             }
-            else if let tabBar = subview as? UITabBar, let items = tabBar.items {
+            else if let tabBar = subview as? UITabBar {
+                guard let items = tabBar.items else{
+                    return
+                }
                 var keys = tabBar.localizationKeys
                 print("TabBar Localization Keys: \(keys)")
                 
@@ -115,8 +120,13 @@ open class LocalizationUtility: NSObject {
                         segment.setTitle(key, forSegmentAt: index)
                     }
                 }
+            }else if let tableView = subview as? UITableView{
+                tableView.reloadVisibleCurrentRows()
             }
-            else if let tabBar = subview as? UITabBar, let items = tabBar.items {
+            else if let tabBar = subview as? UITabBar{
+                guard let items = tabBar.items else{
+                    return
+                }
                 
                 var titlesArray: [String] = []
                 
