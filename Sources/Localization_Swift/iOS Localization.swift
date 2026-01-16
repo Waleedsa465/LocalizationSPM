@@ -12,6 +12,7 @@ import UIKit
 
 nonisolated(unsafe) public var localizationKeyAssociatedObjectKey: UInt8 = 0
 nonisolated(unsafe) public var localizationKeysAssociatedObjectKey: UInt8 = 0
+nonisolated(unsafe) public var localizationKeyTabBarAssociatedObjectKey: UInt8 = 0
 
 extension UIView {
     var localizationKey: String? {
@@ -29,8 +30,8 @@ extension UISegmentedControl {
 
 extension UITabBar {
     var localizationKeys: [String?] {
-        get { objc_getAssociatedObject(self, &localizationKeysAssociatedObjectKey) as? [String?] ?? [] }
-        set { objc_setAssociatedObject(self, &localizationKeysAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
+        get { objc_getAssociatedObject(self, &localizationKeyTabBarAssociatedObjectKey) as? [String?] ?? [] }
+        set { objc_setAssociatedObject(self, &localizationKeyTabBarAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
 }
 
@@ -65,7 +66,7 @@ open class LocalizationUtility: NSObject {
                     }
                 }
             }
-            else if let tabBar = subview as? UITabBar, let items = tabBar.items, !items.isEmpty {
+            else if let tabBar = subview as? UITabBar, let items = tabBar.items {
                 var keys = tabBar.localizationKeys
                 print("TabBar Localization Keys: \(keys)")
                 
@@ -116,11 +117,11 @@ open class LocalizationUtility: NSObject {
                 }
             }
             else if let tabBar = subview as? UITabBar, let items = tabBar.items {
-                var keys = tabBar.localizationKeys
+                
                 var titlesArray: [String] = []
                 
                 for index in 0..<items.count {
-                    if let key = keys[safe: index],let key {
+                    if let key = tabBar.localizationKeys[safe: index],let key {
                         print("Resetting TabBar item \(index) with key: \(key)")
                         items[index].title = key
                         titlesArray.append(key)
