@@ -19,6 +19,16 @@ extension UIView {
         get { objc_getAssociatedObject(self, &localizationKeyAssociatedObjectKey) as? String }
         set { objc_setAssociatedObject(self, &localizationKeyAssociatedObjectKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC) }
     }
+    var viewController: UIViewController? {
+        var nextResponder: UIResponder? = self
+        while nextResponder != nil {
+            nextResponder = nextResponder?.next
+            if let viewController = nextResponder as? UIViewController {
+                return viewController
+            }
+        }
+        return nil
+    }
 }
 
 extension UISegmentedControl {
@@ -94,6 +104,12 @@ open class LocalizationUtility: NSObject {
                 tabBar.setNeedsLayout()
                 tabBar.layoutIfNeeded()
                 print("TabBar layout updated")
+            } else if let viewController = view.viewController {
+                if let tabBarController = viewController as? UITabBarController {
+                    tabBarController.localizedTabbars()
+                }else if let navigationController = viewController as? UINavigationController {
+                    // Working Soon
+                }
             }
             
             localizeViewHierarchy(view: subview)
@@ -141,9 +157,19 @@ open class LocalizationUtility: NSObject {
                 tabBar.layoutIfNeeded()
                 print("TabBar layout updated")
             }
+            else if let viewController = view.viewController {
+                if let tabBarController = viewController as? UITabBarController {
+                    tabBarController.localizedTabbars()
+                }else if let navigationController = viewController as? UINavigationController {
+                    // Working Soon
+                }
+            }
             
             resetToLocalizationKeys(view: subview)
         }
     }
+}
+extension UITabBarController{
+    func localizedTabbars(){}
 }
 #endif
