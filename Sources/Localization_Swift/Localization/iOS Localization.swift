@@ -106,7 +106,34 @@ open class LocalizationUtility: NSObject {
                 print("TabBar layout updated")
             } else if let viewController = view.viewController {
                 if let tabBarController = viewController as? UITabBarController {
-                    tabBarController.localizedTabbars()
+                    let tabBar = tabBarController.tabBar
+                    
+                        guard let items = tabBar.items else{
+                            return
+                        }
+                        var keys = tabBar.localizationKeys
+                        print("TabBar Localization Keys: \(keys)")
+                        
+                        // Save original titles ONLY if empty (first time)
+                        if keys.isEmpty {
+                            keys = items.map { $0.title ?? "" }
+                            tabBar.localizationKeys = keys
+                            print("TabBar Keys saved: \(keys)")
+                        }
+                        
+                        // Apply localized titles
+                        for index in 0..<items.count {
+                            if let key = keys[safe: index],let key {
+                                print("TabBar item \(index) localizing title: \(key) -> localized: \(key.localized())")
+                                items[index].title = key.localized()
+                            }
+                        }
+                        
+                        // Force tab bar to redraw (critical!)
+                        tabBar.setNeedsLayout()
+                        tabBar.layoutIfNeeded()
+                        print("TabBar layout updated")
+                    
                 }else if let navigationController = viewController as? UINavigationController {
                     // Working Soon
                 }
@@ -144,13 +171,10 @@ open class LocalizationUtility: NSObject {
                     return
                 }
                 
-                var titlesArray: [String] = []
-                
                 for index in 0..<items.count {
                     if let key = tabBar.localizationKeys[safe: index],let key {
                         print("Resetting TabBar item \(index) with key: \(key)")
                         items[index].title = key
-                        titlesArray.append(key)
                     }
                 }
                 tabBar.setNeedsLayout()
@@ -159,7 +183,22 @@ open class LocalizationUtility: NSObject {
             }
             else if let viewController = view.viewController {
                 if let tabBarController = viewController as? UITabBarController {
-                    tabBarController.localizedTabbars()
+                    let tabBar = tabBarController.tabBar
+                    
+                        guard let items = tabBar.items else{
+                            return
+                        }
+                        
+                        for index in 0..<items.count {
+                            if let key = tabBar.localizationKeys[safe: index],let key {
+                                print("Resetting TabBar item \(index) with key: \(key)")
+                                items[index].title = key
+                            }
+                        }
+                        tabBar.setNeedsLayout()
+                        tabBar.layoutIfNeeded()
+                        print("TabBar layout updated")
+                    
                 }else if let navigationController = viewController as? UINavigationController {
                     // Working Soon
                 }
@@ -168,8 +207,5 @@ open class LocalizationUtility: NSObject {
             resetToLocalizationKeys(view: subview)
         }
     }
-}
-extension UITabBarController{
-    func localizedTabbars(){}
 }
 #endif
