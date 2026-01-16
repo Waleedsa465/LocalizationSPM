@@ -1,9 +1,3 @@
-//
-//  File.swift
-//  Localization_Swift
-//
-//  Created by Macbook Pro M1 on 19/12/2025.
-//
 
 import Foundation
 import ObjectiveC
@@ -62,9 +56,7 @@ open class LocalizationUtility: NSObject {
                 textField.placeholder = placeholder.localized()
             } else if let collection = subview as? UICollectionView {
                 collection.reloadData()
-            }
-            // Segmented Control
-            else if let segment = subview as? UISegmentedControl {
+            } else if let segment = subview as? UISegmentedControl {
                 var keys = segment.localizationKeys
                 if keys.isEmpty {
                     keys = (0..<segment.numberOfSegments).map { segment.titleForSegment(at: $0) ?? "" }
@@ -75,11 +67,10 @@ open class LocalizationUtility: NSObject {
                         segment.setTitle(localized, forSegmentAt: index)
                     }
                 }
-            }else if let tableView = subview as? UITableView{
+            } else if let tableView = subview as? UITableView {
                 tableView.reloadVisibleCurrentRows()
-            }
-            else if let tabBar = subview as? UITabBar {
-                guard let items = tabBar.items else{
+            } else if let tabBar = subview as? UITabBar {
+                guard let items = tabBar.items else {
                     return
                 }
                 var keys = tabBar.localizationKeys
@@ -94,7 +85,7 @@ open class LocalizationUtility: NSObject {
                 
                 // Apply localized titles
                 for index in 0..<items.count {
-                    if let key = keys[safe: index],let key {
+                    if let key = keys[safe: index], let key {
                         print("TabBar item \(index) localizing title: \(key) -> localized: \(key.localized())")
                         items[index].title = key.localized()
                     }
@@ -106,35 +97,8 @@ open class LocalizationUtility: NSObject {
                 print("TabBar layout updated")
             } else if let viewController = view.viewController {
                 if let tabBarController = viewController as? UITabBarController {
-                    let tabBar = tabBarController.tabBar
-                    
-                        guard let items = tabBar.items else{
-                            return
-                        }
-                        var keys = tabBar.localizationKeys
-                        print("TabBar Localization Keys: \(keys)")
-                        
-                        // Save original titles ONLY if empty (first time)
-                        if keys.isEmpty {
-                            keys = items.map { $0.title ?? "" }
-                            tabBar.localizationKeys = keys
-                            print("TabBar Keys saved: \(keys)")
-                        }
-                        
-                        // Apply localized titles
-                        for index in 0..<items.count {
-                            if let key = keys[safe: index],let key {
-                                print("TabBar item \(index) localizing title: \(key) -> localized: \(key.localized())")
-                                items[index].title = key.localized()
-                            }
-                        }
-                        
-                        // Force tab bar to redraw (critical!)
-                        tabBar.setNeedsLayout()
-                        tabBar.layoutIfNeeded()
-                        print("TabBar layout updated")
-                    
-                }else if let navigationController = viewController as? UINavigationController {
+                    tabBarController.localizedTabbars() // Call the localizedTabbars method
+                } else if let navigationController = viewController as? UINavigationController {
                     // Working Soon
                 }
             }
@@ -154,25 +118,22 @@ open class LocalizationUtility: NSObject {
                 textField.placeholder = key
             } else if let collection = subview as? UICollectionView {
                 collection.reloadData()
-            }
-            // Segmented Control reset
-            else if let segment = subview as? UISegmentedControl {
+            } else if let segment = subview as? UISegmentedControl {
                 let keys = segment.localizationKeys
                 for index in 0..<segment.numberOfSegments {
                     if let key = keys[safe: index] {
                         segment.setTitle(key, forSegmentAt: index)
                     }
                 }
-            }else if let tableView = subview as? UITableView{
+            } else if let tableView = subview as? UITableView {
                 tableView.reloadVisibleCurrentRows()
-            }
-            else if let tabBar = subview as? UITabBar{
-                guard let items = tabBar.items else{
+            } else if let tabBar = subview as? UITabBar {
+                guard let items = tabBar.items else {
                     return
                 }
                 
                 for index in 0..<items.count {
-                    if let key = tabBar.localizationKeys[safe: index],let key {
+                    if let key = tabBar.localizationKeys[safe: index], let key {
                         print("Resetting TabBar item \(index) with key: \(key)")
                         items[index].title = key
                     }
@@ -180,31 +141,45 @@ open class LocalizationUtility: NSObject {
                 tabBar.setNeedsLayout()
                 tabBar.layoutIfNeeded()
                 print("TabBar layout updated")
-            }
-            else if let viewController = view.viewController {
+            } else if let viewController = view.viewController {
                 if let tabBarController = viewController as? UITabBarController {
-                    let tabBar = tabBarController.tabBar
-                    
-                        guard let items = tabBar.items else{
-                            return
-                        }
-                        
-                        for index in 0..<items.count {
-                            if let key = tabBar.localizationKeys[safe: index],let key {
-                                print("Resetting TabBar item \(index) with key: \(key)")
-                                items[index].title = key
-                            }
-                        }
-                        tabBar.setNeedsLayout()
-                        tabBar.layoutIfNeeded()
-                        print("TabBar layout updated")
-                    
-                }else if let navigationController = viewController as? UINavigationController {
+                    tabBarController.localizedTabbars() // Reset the localizedTabbars method
+                } else if let navigationController = viewController as? UINavigationController {
                     // Working Soon
                 }
             }
             
             resetToLocalizationKeys(view: subview)
+        }
+    }
+}
+
+// UITabBarController Extension for Localizing Tab Bar Items
+extension UITabBarController {
+    func localizedTabbars() {
+        let tabBar = self.tabBar
+        
+        // Save the original titles the first time (only if they are not saved already)
+        if tabBar.localizationKeys.isEmpty {
+            let items = tabBar.items ?? []
+            let originalTitles = items.map { $0.title ?? "" }
+            tabBar.localizationKeys = originalTitles
+            print("TabBar Keys saved: \(originalTitles)")
+        }
+        
+        // Apply localized titles only when localization keys are available
+        if let items = tabBar.items {
+            var keys = tabBar.localizationKeys
+            for (index, item) in items.enumerated() {
+                if let key = keys[safe: index], !(key?.isEmpty ?? false) {
+                    item.title = key?.localized()
+                }
+            }
+            
+            // Force tab bar to redraw (critical!)
+            tabBar.setNeedsLayout()
+            tabBar.layoutIfNeeded()
+            print("TabBar layout updated")
         }
     }
 }
