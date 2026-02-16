@@ -30,10 +30,15 @@ open class LocalizationUtility: NSObject {
     
     @MainActor open class func localizeViewHierarchy(view: NSView) {
         for subview in view.subviews {
-            if let label = subview as? NSTextField {
-                let text = label.stringValue
-                label.localizationKey = text
-                label.stringValue = text.localized()
+            if let textField = subview as? NSTextField {
+                if let placeholder = textField.placeholderString, !placeholder.isEmpty {
+                    textField.localizationKey = placeholder
+                    textField.placeholderString = placeholder.localized()
+                } else {
+                    let text = textField.stringValue
+                    textField.localizationKey = text
+                    textField.stringValue = text.localized()
+                }
             } else if let button = subview as? NSButton {
                 let text = button.stringValue
                 button.localizationKey = text
@@ -58,9 +63,13 @@ open class LocalizationUtility: NSObject {
     }
     @MainActor open class func resetToLocalizationKeys(view: NSView) {
         for subview in view.subviews {
-            if let label = subview as? NSTextField, let key = label.localizationKey {
-                label.stringValue = key
-            } else if let button = subview as? NSButton, let key = button.localizationKey {
+            if let textField = subview as? NSTextField, let key = textField.localizationKey {
+                if let placeholder = textField.placeholderString, !placeholder.isEmpty {
+                    textField.placeholderString = key
+                } else {
+                    textField.stringValue = key
+                }
+            }else if let button = subview as? NSButton, let key = button.localizationKey {
                 button.stringValue = key
             } else if let textField = subview as? NSTextField, let key = textField.localizationKey {
                 textField.placeholderString = key
