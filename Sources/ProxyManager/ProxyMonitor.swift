@@ -5,13 +5,13 @@ import NetworkExtension
 import Localization_Swift
 
 #if os(macOS)
-public class ProxyMonitor {
+open class ProxyMonitor {
     
     private var proxyObservationTask: Task<Void, Never>?
     private var alert: NSAlert?
     var isEnableProxy: Bool = false
     
-    public func startMonitoringProxySettings() {
+    open class func startMonitoringProxySettings() {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
@@ -25,7 +25,7 @@ public class ProxyMonitor {
         }
     }
 
-    public func stopMonitoringProxySettings() {
+    open class func stopMonitoringProxySettings() {
         proxyObservationTask?.cancel()
     }
 
@@ -91,13 +91,13 @@ public class ProxyMonitor {
 #if os(iOS)
 import UIKit
 
-public class ProxyMonitor {
+open class ProxyMonitor {
     
     private var proxyObservationTask: Task<Void, Never>?
     private var alert: UIAlertController?
     var isEnableProxy: Bool = false
     
-    public func startMonitoringProxySettings() {
+    open class startMonitoringProxySettings() {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
@@ -111,7 +111,7 @@ public class ProxyMonitor {
         }
     }
 
-    public func stopMonitoringProxySettings() {
+    open class stopMonitoringProxySettings() {
         proxyObservationTask?.cancel()
     }
 
