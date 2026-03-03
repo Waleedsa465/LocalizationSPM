@@ -20,8 +20,7 @@ open class ProxyMonitor: NSObject {
 
     // Start monitoring proxy settings (instance method)
     open func startMonitoringProxySettings() {
-        proxyObservationTask = Task(priority: .high) { [weak self] in
-            guard let self = self else { return }
+        proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
                     try await Task.sleep(nanoseconds: UInt64(0.2) * 1_000_000_000)
@@ -121,8 +120,7 @@ open class ProxyMonitor: NSObject {
 
     // Start monitoring proxy settings (instance method)
     open func startMonitoringProxySettings() {
-        proxyObservationTask = Task(priority: .high) { [weak self] in
-            guard let self = self else { return }
+        proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
                     try await Task.sleep(nanoseconds: UInt64(0.2) * 1_000_000_000)
