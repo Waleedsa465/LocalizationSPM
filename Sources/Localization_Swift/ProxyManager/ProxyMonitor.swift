@@ -23,7 +23,7 @@ open class ProxyMonitor: NSObject {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
-                    try await Task.sleep(nanoseconds: UInt64(2.0) * 1_000_000_000)
+                    try await Task.sleep(nanoseconds: UInt64(1.0) * 1_000_000_000)
                     await self.checkProxySettings() // Call instance method
                 } catch {
                     print("Failed to sleep: \(error)")
@@ -123,7 +123,7 @@ open class ProxyMonitor: NSObject {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
-                    try await Task.sleep(nanoseconds: UInt64(2.0) * 1_000_000_000)
+                    try await Task.sleep(nanoseconds: UInt64(1.0) * 1_000_000_000)
                     await self.checkProxySettings() // Access instance method
                 } catch {
                     print("Failed to sleep: \(error)")
