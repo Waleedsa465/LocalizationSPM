@@ -102,7 +102,7 @@ open class ProxyMonitor : NSObject {
     private var alert: UIAlertController?
     var isEnableProxy: Bool = false
     
-    open class startMonitoringProxySettings() {
+    open class func startMonitoringProxySettings() {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
