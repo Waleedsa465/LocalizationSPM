@@ -7,13 +7,13 @@ import Localization_Swift
 #if os(macOS)
 open class ProxyMonitor : NSObject {
     
-    override public init()
+    public override init() { }
     
     private var proxyObservationTask: Task<Void, Never>?
     private var alert: NSAlert?
     var isEnableProxy: Bool = false
     
-    open class func startMonitoringProxySettings() {
+    @MainActor open class func startMonitoringProxySettings() {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
@@ -27,7 +27,7 @@ open class ProxyMonitor : NSObject {
         }
     }
 
-    open class func stopMonitoringProxySettings() {
+    @MainActor open class func stopMonitoringProxySettings() {
         proxyObservationTask?.cancel()
     }
 
@@ -95,14 +95,14 @@ import UIKit
 
 open class ProxyMonitor : NSObject {
     
-    override public init()
+    public override init() { }
     
     
     private var proxyObservationTask: Task<Void, Never>?
     private var alert: UIAlertController?
     var isEnableProxy: Bool = false
     
-    open class func startMonitoringProxySettings() {
+    @MainActor open class func startMonitoringProxySettings() {
         proxyObservationTask = Task(priority: .high) {
             while true {
                 do {
@@ -116,7 +116,7 @@ open class ProxyMonitor : NSObject {
         }
     }
 
-    open class stopMonitoringProxySettings() {
+    @MainActor open class func stopMonitoringProxySettings() {
         proxyObservationTask?.cancel()
     }
 

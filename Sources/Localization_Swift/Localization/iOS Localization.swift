@@ -136,6 +136,7 @@ open class LocalizationUtility: NSObject {
                     
                 }else if let navigationController = viewController as? UINavigationController {
                     // Working Soon
+                    print(navigationController.navigationBar.barTintColor as Any)
                 }
             }
             
@@ -200,7 +201,7 @@ open class LocalizationUtility: NSObject {
                         print("TabBar layout updated")
                     
                 }else if let navigationController = viewController as? UINavigationController {
-                    // Working Soon
+                    print(navigationController.navigationBar.barTintColor as Any)
                 }
             }
             
@@ -218,7 +219,7 @@ extension UITabBarController {
             print("TabBar Keys saved: \(originalTitles)")
         }
         if let items = tabBar.items {
-            var keys = tabBar.localizationKeys
+            let keys = tabBar.localizationKeys
             for (index, item) in items.enumerated() {
                 if let key = keys[safe: index], !(key?.isEmpty ?? false) {
                     item.title = key?.localized()
