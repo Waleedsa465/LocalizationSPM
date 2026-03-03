@@ -5,7 +5,9 @@ import NetworkExtension
 import Localization_Swift
 
 #if os(macOS)
-open class ProxyMonitor {
+open class ProxyMonitor : NSObject {
+    
+    override public init()
     
     private var proxyObservationTask: Task<Void, Never>?
     private var alert: NSAlert?
@@ -91,7 +93,10 @@ open class ProxyMonitor {
 #if os(iOS)
 import UIKit
 
-open class ProxyMonitor {
+open class ProxyMonitor : NSObject {
+    
+    override public init()
+    
     
     private var proxyObservationTask: Task<Void, Never>?
     private var alert: UIAlertController?
