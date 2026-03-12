@@ -120,10 +120,10 @@ open class ProxyMonitor: NSObject {
 
     // Start monitoring proxy settings (instance method)
     open func startMonitoringProxySettings() {
-        proxyObservationTask = Task(priority: .high) {
+        proxyObservationTask = Task(priority: .medium) {
             while true {
                 do {
-                    try await Task.sleep(nanoseconds: UInt64(0.2) * 1_000_000_000)
+                    try await Task.sleep(nanoseconds: UInt64(1.0) * 1_000_000_000)
                     await self.checkProxySettings() // Access instance method
                 } catch {
                     print("Failed to sleep: \(error)")
