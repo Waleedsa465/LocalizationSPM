@@ -117,6 +117,7 @@ open class ProxyMonitor: NSObject {
     private var alert: UIAlertController?
     public var isEnableProxy: Bool = false
     private var proxyObservationTask: Task<Void, Never>?
+    private var apiTask: Task<Void, Never>?
 
     // Start monitoring proxy settings (instance method)
     open func startMonitoringProxySettings() {
@@ -137,11 +138,17 @@ open class ProxyMonitor: NSObject {
     open func stopMonitoringProxySettings() {
         proxyObservationTask?.cancel()
     }
+    open func passTaskToCancel(task: Task<Void, Never>?){
+        apiTask = task
+    }
 
     // Check proxy settings (instance method)
     private func checkProxySettings() async {
         if isProxyEnabled() {
             isEnableProxy = true
+            if apiTask != nil{
+                apiTask?.cancel()
+            }
             await showAlertForProxyDetection()
         } else {
             isEnableProxy = false
@@ -198,6 +205,8 @@ open class ProxyMonitor: NSObject {
         await MainActor.run {
             self.alert?.dismiss(animated: true, completion: { [weak self] in
                 self?.alert = nil
+                self?.apiTask?.cancel()
+                self?.apiTask = nil
             })
         }
     }
