@@ -181,8 +181,12 @@ open class ProxyMonitor: NSObject {
         
         // Present the alert on the main thread
         await MainActor.run {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene, let alert {
-                if let rootViewController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                  let alert = alert else { return }
+            if let rootViewController = windowScene.windows.first(where: { $0.isKeyWindow })?.rootViewController {
+                if let presentedViewController = rootViewController.presentedViewController {
+                    presentedViewController.present(alert, animated: true, completion: nil)
+                } else {
                     rootViewController.present(alert, animated: true, completion: nil)
                 }
             }
