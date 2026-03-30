@@ -13,6 +13,7 @@ open class ProxyMonitor: NSObject {
     public var alert: NSAlert?
     public var isEnableProxy: Bool = false
     private var proxyObservationTask: Task<Void, Never>?
+    private var apiTask: Task<Void, Never>?
 
     public override init() {
         super.init()
@@ -32,7 +33,9 @@ open class ProxyMonitor: NSObject {
             }
         }
     }
-    
+    open func passTaskToCancel(task: Task<Void, Never>?){
+        apiTask = task
+    }
     // Stop monitoring proxy settings (instance method)
     open func stopMonitoringProxySettings() {
         proxyObservationTask?.cancel()
@@ -42,6 +45,9 @@ open class ProxyMonitor: NSObject {
     private func checkProxySettings() async {
         if isProxyEnabled() {
             isEnableProxy = true
+            if apiTask != nil{
+                apiTask?.cancel()
+            }
             await showAlertForProxyDetection()
         } else {
             isEnableProxy = false
@@ -97,9 +103,11 @@ open class ProxyMonitor: NSObject {
     
     // Close the alert if it's visible
     private func closeAlertIfVisible() async {
-        await MainActor.run {
-            self.alert?.window.close()
-            self.alert = nil
+        await MainActor.run { [weak self] in
+            self?.alert?.window.close()
+            self?.alert = nil
+            self?.apiTask?.cancel()
+            self?.apiTask = nil
         }
     }
 }
