@@ -106,7 +106,9 @@ open class ProxyMonitor: NSObject {
         await MainActor.run { [weak self] in
             self?.alert?.window.close()
             self?.alert = nil
-            self?.apiTask?.cancel()
+            if self?.apiTask != nil{
+                self?.apiTask?.cancel()
+            }
 //            self?.apiTask = nil
         }
     }
