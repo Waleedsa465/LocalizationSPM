@@ -107,7 +107,7 @@ open class ProxyMonitor: NSObject {
             self?.alert?.window.close()
             self?.alert = nil
             self?.apiTask?.cancel()
-            self?.apiTask = nil
+//            self?.apiTask = nil
         }
     }
 }
