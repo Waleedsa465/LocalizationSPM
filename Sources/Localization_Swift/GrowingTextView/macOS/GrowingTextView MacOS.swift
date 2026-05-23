@@ -55,9 +55,9 @@ open class GrowingTextScrollView: NSScrollView {
     // MARK: - Recalculation of Height
     open func recalculateHeight() {
         guard let textView = documentView as? NSTextView,
-              let font = textView.font ,let textContainer = textView.textContainer else { return }
+              let font = textView.font else { return }
         
-        let textHeight = textView.layoutManager?.usedRect(for: textContainer).height ?? minimumHeightConstrait
+        let textHeight = textView.layoutManager?.usedRect(for: textView.textContainer!).height ?? minimumHeightConstrait
         let lineHeight = font.lineHeight + 4
         let maxHeight = lineHeight * CGFloat(maxNumberOfLines) + textView.textContainerInset.height * 2
         let finalHeight = min(maxHeight, textHeight + textView.textContainerInset.height * 2)
