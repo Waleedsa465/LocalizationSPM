@@ -20,16 +20,6 @@ open class GrowingTextScrollView: NSScrollView {
         Task{ @MainActor in commonInit() }
     }
     
-    public override init(frame: NSRect) {
-        super.init(frame: frame)
-        Task{ @MainActor in commonInit() }
-    }
-    
-    public required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        Task{ @MainActor in commonInit() }
-    }
-    
     private func commonInit() {
         drawsBackground = false
         hasVerticalScroller = false
@@ -57,16 +47,6 @@ open class GrowingTextScrollView: NSScrollView {
             }
         }
     }
-    
-    // MARK: - IBDesignable Preview Support
-    open override func prepareForInterfaceBuilder() {
-        super.prepareForInterfaceBuilder()
-        Task{ @MainActor in
-            commonInit()
-            recalculateHeight()
-        }
-    }
-    
     // MARK: - Text Change Observer
     @objc open func textDidChangeType() {
         recalculateHeight()
