@@ -5,31 +5,48 @@ import AppKit
 @IBDesignable
 @MainActor
 open class GrowingTextScrollView: NSScrollView {
-    
+
     @IBInspectable public var maxNumberOfLines: Int = 8 {
         didSet { recalculateHeight() }
     }
-    
+
     @IBInspectable public var minimumHeightConstrait: CGFloat = 41.0
-    
+
     private var heightConstraint: NSLayoutConstraint?
-    
+
     // MARK: - Initial Setup
+    public override init(frame: NSRect) {
+        super.init(frame: frame)
+        commonInit()
+    }
+
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        commonInit()
+    }
+
     open override func awakeFromNib() {
         super.awakeFromNib()
-        Task{ @MainActor in commonInit() }
+        Task{ @MainActor in
+            commonInit()
+        }
     }
-    
+
     private func commonInit() {
         drawsBackground = false
         hasVerticalScroller = false
         hasHorizontalScroller = false
-        
+
         if let textView = documentView as? NSTextView {
             textView.isVerticallyResizable = true
             textView.isHorizontallyResizable = false
             textView.textContainer?.widthTracksTextView = true
-            
+
+            NotificationCenter.default.removeObserver(
+                self,
+                name: NSText.didChangeNotification,
+                object: textView
+            )
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(textDidChangeType),
@@ -37,7 +54,7 @@ open class GrowingTextScrollView: NSScrollView {
                 object: textView
             )
         }
-        
+
         if heightConstraint == nil {
             if let hc = constraints.first(where: { $0.firstAttribute == .height }) {
                 heightConstraint = hc
@@ -47,29 +64,41 @@ open class GrowingTextScrollView: NSScrollView {
             }
         }
     }
+
+    // MARK: - IBDesignable Preview Support
+    open override func prepareForInterfaceBuilder() {
+        super.prepareForInterfaceBuilder()
+        Task{ @MainActor in
+            commonInit()
+            recalculateHeight()
+        }
+    }
+
     // MARK: - Text Change Observer
     @objc open func textDidChangeType() {
         recalculateHeight()
     }
-    
+
     // MARK: - Recalculation of Height
     open func recalculateHeight() {
         guard let textView = documentView as? NSTextView,
-              let font = textView.font else { return }
-        
-        let textHeight = textView.layoutManager?.usedRect(for: textView.textContainer!).height ?? minimumHeightConstrait
+              let font = textView.font,
+              let textContainer = textView.textContainer,
+              let layoutManager = textView.layoutManager else { return }
+
+        let textHeight = layoutManager.usedRect(for: textContainer).height
         let lineHeight = font.lineHeight + 4
         let maxHeight = lineHeight * CGFloat(maxNumberOfLines) + textView.textContainerInset.height * 2
         let finalHeight = min(maxHeight, textHeight + textView.textContainerInset.height * 2)
-        heightConstraint?.constant = max(finalHeight, lineHeight + 12) // at least 1 line tall
+        heightConstraint?.constant = max(finalHeight, lineHeight + 12)
     }
-    
+
     // MARK: - Layout Handling
     open override func layout() {
         super.layout()
         recalculateHeight()
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
