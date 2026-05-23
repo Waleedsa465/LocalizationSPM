@@ -1,10 +1,3 @@
-//
-//  NonClickableView.swift
-//  Localization_Swift
-//
-//  Created by Personal on 25/01/2026.
-//
-
 #if os(macOS)
 import Cocoa
 

@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  Localization_Swift
-//
-//  Created by Macbook Pro M1 on 25/11/2025.
-//
-
 import Foundation
 
 public func Localized(_ string: String) -> String {

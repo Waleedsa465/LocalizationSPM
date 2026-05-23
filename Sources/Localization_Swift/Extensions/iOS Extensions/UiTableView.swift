@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  Localization_Swift
-//
-//  Created by Personal on 16/01/2026.
-//
-
 #if os(iOS)
 import UIKit
 import Foundation

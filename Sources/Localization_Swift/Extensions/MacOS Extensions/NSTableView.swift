@@ -1,9 +1,3 @@
-//
-//  NSTableView.swift
-//  Genmoji
-//
-//  Created by Macbook Pro on 19/05/2025.
-//
 #if os(macOS)
 import Cocoa
 

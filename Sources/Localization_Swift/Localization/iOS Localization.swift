@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  Localization_Swift
-//
-//  Created by Macbook Pro M1 on 19/12/2025.
-//
-
 import Foundation
 import ObjectiveC
 #if os(iOS)
