@@ -1,3 +1,4 @@
+#if os(iOS)
 import Foundation
 import UIKit
 
@@ -73,3 +74,4 @@ open class PlaceholderTextView: UITextView {
         NotificationCenter.default.removeObserver(self)
     }
 }
+#endif

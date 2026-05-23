@@ -1,3 +1,4 @@
+#if os(iOS)
 import UIKit
 
 @IBDesignable
@@ -75,3 +76,4 @@ extension UIFont {
         return ascender + abs(descender) + leading
     }
 }
+#endif
