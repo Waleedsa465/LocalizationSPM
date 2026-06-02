@@ -1,5 +1,5 @@
 #if os(macOS)
-internal import SwiftUI
+import SwiftUI
 
 struct ToastView: View {
     let message: String

@@ -1,6 +1,6 @@
 #if os(macOS)
 import AppKit
-internal import SwiftUI
+import SwiftUI
 
 @MainActor
 public class ToastWindowController {
@@ -20,7 +20,7 @@ public class ToastWindowController {
     }
 
     // MARK: Show Toast Function
-    func showToast(message: String,icon: Image? = nil,duration: TimeInterval? = nil,position: ToastPosition = .bottomCenter(100),textColor: Color ,viewBackGroundColor: Color) {
+    public func showToast(message: String,icon: Image? = nil,duration: TimeInterval? = nil,position: ToastPosition = .bottomCenter(100),textColor: Color ,viewBackGroundColor: Color) {
         if panel == nil {
             let toastView = ToastView(message: message, textColor: textColor, viewBackGroundColor: viewBackGroundColor, icon: icon, panel: nil)
 
