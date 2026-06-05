@@ -50,7 +50,7 @@ open class PlaceholderTextView: UITextView {
     
     open override func layoutSubviews() {
         super.layoutSubviews()
-        placeholderLabel.frame.origin = CGPoint(x: textContainerInset.left + 3, y: textContainerInset.top)
+        placeholderLabel.frame.origin = CGPoint(x: textContainerInset.left + 5, y: textContainerInset.top)
         placeholderLabel.frame.size.width = frame.width - textContainerInset.left - textContainerInset.right
     }
     
