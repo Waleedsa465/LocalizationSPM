@@ -3,7 +3,7 @@ import UIKit
 import Foundation
 
 extension UITableView {
-    func reloadVisibleCurrentRows() {
+    public func reloadVisibleCurrentRows() {
         guard let visibleIndexPaths = indexPathsForVisibleRows else { return }
         reloadRows(at: visibleIndexPaths, with: .automatic)
     }
