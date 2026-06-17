@@ -8,6 +8,19 @@ struct ToastView: View {
     let icon: Image?
     weak var panel: NSPanel?
     
+    @ViewBuilder
+    private var messageText: some View {
+        if #available(macOS 12.0, *) {
+            Text(message)
+                .multilineTextAlignment(.leading)
+                .foregroundStyle(textColor)
+        } else {
+            Text(message)
+                .multilineTextAlignment(.leading)
+                .foregroundColor(textColor)
+        }
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             if let icon = icon {
@@ -17,15 +30,7 @@ struct ToastView: View {
                     .frame(width: 16, height: 16)
                     .foregroundColor(.primary)
             }
-            if #available(macOS 12.0, *) {
-                Text(message)
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(textColor)
-            } else {
-                Text(message)
-                    .multilineTextAlignment(.leading)
-                textColor
-            }
+            messageText
         }
         .onTapGesture {
             guard let panel = panel else { return }
@@ -34,7 +39,7 @@ struct ToastView: View {
                 context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
                 panel.animator().alphaValue = 0
             }, completionHandler: {
-                Task{ @MainActor in panel.orderOut(nil) }
+                Task { @MainActor in panel.orderOut(nil) }
             })
         }
         .padding(.horizontal, 20)
