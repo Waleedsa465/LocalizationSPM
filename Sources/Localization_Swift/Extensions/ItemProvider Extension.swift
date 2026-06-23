@@ -5,7 +5,7 @@ public typealias PlatformImage = UIImage
 import AppKit
 public typealias PlatformImage = NSImage
 #endif
-
+import UniformTypeIdentifiers
 import Foundation
 
 public extension NSItemProvider {
@@ -26,9 +26,30 @@ public extension NSItemProvider {
             }
         }
 #else
+//        return await withCheckedContinuation { continuation in
+//            loadObject(ofClass: PlatformImage.self) { image, _ in
+//                continuation.resume(returning: image as? PlatformImage)
+//            }
+//        }
         return await withCheckedContinuation { continuation in
-            loadObject(ofClass: PlatformImage.self) { image, _ in
-                continuation.resume(returning: image as? PlatformImage)
+            
+            loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, error in
+
+                if let error {
+                    print(error)
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                guard let url,
+                      let data = try? Data(contentsOf: url),
+                      let image = UIImage(data: data)
+                else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+
+                continuation.resume(returning: image)
             }
         }
 #endif

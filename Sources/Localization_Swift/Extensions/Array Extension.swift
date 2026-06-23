@@ -6,3 +6,14 @@ extension Array {
         return indices.contains(index) ? self[index] : nil
     }
 }
+extension Sequence {
+    func asyncCompactMap<T>(_ transform: (Element) async -> T?) async -> [T] {
+        var results: [T] = []
+        for element in self {
+            if let value = await transform(element) {
+                results.append(value)
+            }
+        }
+        return results
+    }
+}
