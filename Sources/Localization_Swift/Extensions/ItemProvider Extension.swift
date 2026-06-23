@@ -33,18 +33,18 @@ public extension NSItemProvider {
 //        }
         return await withCheckedContinuation { continuation in
             
-            loadFileRepresentation(forTypeIdentifier: UTType.image.identifier) { url, error in
+            loadDataRepresentation(
+                forTypeIdentifier: UTType.image.identifier
+            ) { data, error in
 
                 if let error {
-                    print(error)
+                    print("Image Load Error:", error)
                     continuation.resume(returning: nil)
                     return
                 }
 
-                guard let url,
-                      let data = try? Data(contentsOf: url),
-                      let image = UIImage(data: data)
-                else {
+                guard let data,
+                      let image = UIImage(data: data) else {
                     continuation.resume(returning: nil)
                     return
                 }
