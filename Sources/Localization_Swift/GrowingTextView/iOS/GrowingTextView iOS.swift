@@ -6,7 +6,7 @@ import UIKit
 open class GrowingTextView: PlaceholderTextView, UITextViewDelegate {
 
     @IBInspectable public var maxNumberOfLines: Int = 6 {
-        didSet { recalcHeight() }
+        didSet { recalculateHeight() }
     }
 
     @IBInspectable public var minimumHeightConstrait: CGFloat = 48.0
@@ -44,18 +44,18 @@ open class GrowingTextView: PlaceholderTextView, UITextViewDelegate {
         super.prepareForInterfaceBuilder()
         Task { @MainActor in
             commonInit()
-            recalcHeight()
+            recalculateHeight()
             invalidateIntrinsicContentSize()
         }
     }
 
     // MARK: - UITextViewDelegate Method
     open func textViewDidChange(_ textView: UITextView) {
-        recalcHeight()
+        recalculateHeight()
     }
 
     // MARK: - Recalculation of Height
-    open func recalcHeight() {
+    open func recalculateHeight() {
         guard let font = font else { return }
         let textHeight = contentSize.height
         let lineHeight = font.lineHeight + 4
@@ -67,7 +67,7 @@ open class GrowingTextView: PlaceholderTextView, UITextViewDelegate {
     // MARK: - Layout Handling
     override open func layoutSubviews() {
         super.layoutSubviews()
-        recalcHeight()
+        recalculateHeight()
     }
 }
 
