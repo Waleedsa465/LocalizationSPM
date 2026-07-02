@@ -9,7 +9,7 @@ open class PlaceholderTextView: UITextView {
     
     private let placeholderLabel: UILabel = UILabel()
     
-    @IBInspectable var placeholder: String? {
+    @IBInspectable public var placeholder: String? {
         didSet {
             placeholderLabel.text = placeholder
             placeholderLabel.sizeToFit()
