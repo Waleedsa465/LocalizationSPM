@@ -6,8 +6,9 @@ import Cocoa
 typealias PlatformTableView = NSTableView
 #endif
 
-extension PlatformTableView {
-    public func reloadVisibleCurrentRows() {
+public extension PlatformTableView {
+    
+    func reloadVisibleCurrentRows() {
 #if os(iOS)
         guard let visibleIndexPaths = indexPathsForVisibleRows else { return }
         reloadRows(at: visibleIndexPaths, with: .automatic)
@@ -18,4 +19,5 @@ extension PlatformTableView {
         reloadData(forRowIndexes: visibleIndexSet, columnIndexes: IndexSet(integersIn: 0..<numberOfColumns))
 #endif
     }
+    
 }
