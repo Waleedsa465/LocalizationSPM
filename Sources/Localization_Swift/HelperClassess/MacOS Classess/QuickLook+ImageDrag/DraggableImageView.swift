@@ -4,7 +4,7 @@ import Cocoa
 
 // MARK: - Main Class
 @MainActor
-final class DraggableImageView: NSImageView, NSDraggingSource {
+open class DraggableImageView: NSImageView, NSDraggingSource {
     
     // MARK: Properties
     private var mouseDownEvent: NSEvent?
@@ -17,12 +17,12 @@ final class DraggableImageView: NSImageView, NSDraggingSource {
         setup()
     }
     
-    required init?(coder: NSCoder) {
+    required public init?(coder: NSCoder) {
         super.init(coder: coder)
         setup()
     }
     
-    override func awakeFromNib() {
+    public override func awakeFromNib() {
         super.awakeFromNib()
         quickLookHandler = QuickLookHandler(imageView: self)
     }
@@ -34,12 +34,12 @@ final class DraggableImageView: NSImageView, NSDraggingSource {
     }
     
     // MARK: - Mouse Events
-    override func mouseDown(with event: NSEvent) {
+    open override func mouseDown(with event: NSEvent) {
         mouseDownEvent = event
         isDragging = false
     }
     
-    override func mouseDragged(with event: NSEvent) {
+    open override func mouseDragged(with event: NSEvent) {
         guard !isDragging else { return }
         guard let mouseDownEvent = mouseDownEvent else { return }
         guard let image = self.image else { return }
@@ -66,7 +66,7 @@ final class DraggableImageView: NSImageView, NSDraggingSource {
         beginDraggingSession(with: [draggingItem], event: mouseDownEvent, source: self)
     }
     
-    override func mouseUp(with event: NSEvent) {
+    open override func mouseUp(with event: NSEvent) {
         mouseDownEvent = nil
         if event.clickCount == 1 {
             quickLookHandler?.showPreview()
@@ -83,12 +83,12 @@ final class DraggableImageView: NSImageView, NSDraggingSource {
     }
     
     // MARK: - NSDraggingSource
-    func draggingSession(_ session: NSDraggingSession,
+    public func draggingSession(_ session: NSDraggingSession,
                          sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
         return .copy
     }
     
-    func draggingSession(_ session: NSDraggingSession,
+    public func draggingSession(_ session: NSDraggingSession,
                          endedAt screenPoint: NSPoint,
                          operation: NSDragOperation) {
         if operation == .delete {
@@ -113,11 +113,11 @@ final class DraggableImageView: NSImageView, NSDraggingSource {
 // MARK: - NSFilePromiseProviderDelegate
 extension DraggableImageView: NSFilePromiseProviderDelegate {
     
-    func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider,fileNameForType fileType: String) -> String {
+    public func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider,fileNameForType fileType: String) -> String {
         "\(String(UUID().uuidString).prefix(8)).png"
     }
     
-    func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider,writePromiseTo url: URL,completionHandler: @escaping (Error?) -> Void) {
+    public func filePromiseProvider(_ filePromiseProvider: NSFilePromiseProvider,writePromiseTo url: URL,completionHandler: @escaping (Error?) -> Void) {
         let image = filePromiseProvider.userInfo as? NSImage
         DispatchQueue.global(qos: .utility).async {
             guard let image = image, let pngData = image.pngRepresentation else {
