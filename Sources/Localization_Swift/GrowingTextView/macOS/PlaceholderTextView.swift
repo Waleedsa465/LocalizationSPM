@@ -5,6 +5,10 @@ import AppKit
 public protocol PlaceholderTextViewDelegate: AnyObject {
     func didPressEnter(withText text: String)
 }
+public protocol PlaceholderTextViewResponderDelegate: AnyObject {
+    func textViewDidBecomeFirstResponder()
+    func textViewDidResignFirstResponder()
+}
 
 @IBDesignable
 @MainActor
@@ -19,6 +23,7 @@ open class PlaceholderTextView: NSTextView {
     }
 
     public weak var enterDelegate: PlaceholderTextViewDelegate?
+    public weak var responderDelegate: PlaceholderTextViewResponderDelegate?
 
     // MARK: - Private Helpers
     private var placeholderAttributes: [NSAttributedString.Key: Any] {
@@ -74,12 +79,14 @@ open class PlaceholderTextView: NSTextView {
     open override func becomeFirstResponder() -> Bool {
         let success = super.becomeFirstResponder()
         needsDisplay = true
+        responderDelegate?.textViewDidBecomeFirstResponder()
         return success
     }
 
     open override func resignFirstResponder() -> Bool {
         let success = super.resignFirstResponder()
         needsDisplay = true
+        responderDelegate?.textViewDidResignFirstResponder()
         return success
     }
 
