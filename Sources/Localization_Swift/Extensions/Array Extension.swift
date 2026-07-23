@@ -1,12 +1,13 @@
 
 import Foundation
 
-extension Array {
+public extension Array {
     subscript(safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
 }
-extension Sequence {
+
+public extension Sequence {
     func asyncCompactMap<T>(_ transform: (Element) async -> T?) async -> [T] {
         var results: [T] = []
         for element in self {
