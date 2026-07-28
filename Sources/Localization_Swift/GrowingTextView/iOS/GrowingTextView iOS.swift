@@ -1,6 +1,10 @@
 #if os(iOS)
 import UIKit
 
+public protocol GrowingTextViewDelegate: AnyObject {
+    func textViewDidChange(_ textView: UITextView)
+}
+
 @IBDesignable
 @MainActor
 open class GrowingTextView: PlaceholderTextView, UITextViewDelegate {
@@ -8,7 +12,7 @@ open class GrowingTextView: PlaceholderTextView, UITextViewDelegate {
     @IBInspectable public var maxNumberOfLines: Int = 6 {
         didSet { recalculateHeight() }
     }
-
+    public weak var growingDelegate: GrowingTextViewDelegate?
     @IBInspectable public var minimumHeightConstrait: CGFloat = 48.0
 
     private var heightConstraint: NSLayoutConstraint?
@@ -51,6 +55,7 @@ open class GrowingTextView: PlaceholderTextView, UITextViewDelegate {
 
     // MARK: - UITextViewDelegate Method
     open func textViewDidChange(_ textView: UITextView) {
+        growingDelegate?.textViewDidChange(textView)
         recalculateHeight()
     }
 
