@@ -1,17 +1,23 @@
 import Foundation
 
 public extension String {
-    func localized() -> String {
-        localized(using: nil, in: .main)
+    
+    // MARK: - Variables
+    
+    var cleanedJsonString: String {
+        replacingOccurrences(of: "```json", with: "").replacingOccurrences(of: "```", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    func localizedFormat(_ arguments: CVarArg...) -> String {
-        String(format: localized(), arguments: arguments)
-    }
+    
+    
+    // MARK: - Functions
+    func localized() -> String { localized(using: nil, in: .main) }
+    
+    func commented(_ argument: String) -> String { self }
+    
+    func localizedFormat(_ arguments: CVarArg...) -> String { String(format: localized(), arguments: arguments) }
+    
     func localizedPlural(_ argument: CVarArg) -> String {
         NSString.localizedStringWithFormat(localized() as NSString, argument) as String
-    }
-    func commented(_ argument: String) -> String {
-        self
     }
     func localized(using tableName: String?) -> String {
         localized(using: tableName, in: .main)
@@ -49,5 +55,41 @@ public extension String {
     }
     func localizedPlural(argument: CVarArg, in bundle: Bundle?) -> String {
         NSString.localizedStringWithFormat(localized(in: bundle) as NSString, argument) as String
+    }
+    func truncateName(maxLength: Int = 16) -> String {
+        guard count > maxLength else { return self }
+        let reserved = "...".count
+        let keepLength = max(maxLength - reserved, 1)
+        let truncated = String(prefix(keepLength))
+        return "\(truncated)..."
+    }
+    func extractBase64() -> String {
+        guard let range = self.range(of: "base64,") else {
+            return self
+        }
+        return String(self[range.upperBound...])
+    }
+    func chunked(by size: Int) -> [String] {
+        guard size > 0 else { return [self] }
+        return stride(from: 0, to: count, by: size).map {
+            let start = index(startIndex, offsetBy: $0)
+            let end = index(start, offsetBy: size, limitedBy: endIndex) ?? endIndex
+            return String(self[start..<end])
+        }
+    }
+    func convertHtml() -> NSAttributedString {
+        guard let data = data(using: .utf8) else { return NSAttributedString() }
+        do {
+            return try NSAttributedString(
+                data: data,
+                options: [
+                    NSAttributedString.DocumentReadingOptionKey.documentType:
+                        NSAttributedString.DocumentType.html,
+                    NSAttributedString.DocumentReadingOptionKey
+                        .characterEncoding: String.Encoding.utf8.rawValue,
+                ], documentAttributes: nil)
+        } catch {
+            return NSAttributedString()
+        }
     }
 }
