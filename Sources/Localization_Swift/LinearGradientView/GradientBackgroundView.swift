@@ -18,6 +18,22 @@ public struct GradientBackgroundView: View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
     }
     
+    public init(
+        colors: [Color],
+        startPoint: UnitPoint = .leading,
+        endPoint: UnitPoint = .trailing,
+        cornerRadius: CGFloat = 12,
+        shimmer: Bool = true,
+        breathing: Bool = true
+    ) {
+        self.colors = colors
+        self.startPoint = startPoint
+        self.endPoint = endPoint
+        self.cornerRadius = cornerRadius
+        self.shimmer = shimmer
+        self.breathing = breathing
+    }
+    
     public var body: some View {
         GeometryReader { geo in
             let maxRadius = max(geo.size.width, geo.size.height, 1)

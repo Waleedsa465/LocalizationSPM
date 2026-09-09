@@ -26,12 +26,7 @@ public class Toast {
     
     public private(set) var config: ToastConfiguration
     
-    /// Creates a new Toast with the default Apple style layout with a title and an optional subtitle.
-    /// - Parameters:
-    ///   - title: Attributed title which is displayed in the toast view
-    ///   - subtitle: Optional attributed subtitle which is displayed in the toast view
-    ///   - config: Configuration options
-    /// - Returns: A new Toast view with the configured layout
+    
     @MainActor public static func text(
         _ title: NSAttributedString,
         subtitle: NSAttributedString? = nil,
@@ -42,12 +37,6 @@ public class Toast {
         return self.init(view: view, config: config)
     }
     
-    /// Creates a new Toast with the default Apple style layout with a title and an optional subtitle.
-    /// - Parameters:
-    ///   - title: Title which is displayed in the toast view
-    ///   - subtitle: Optional subtitle which is displayed in the toast view
-    ///   - config: Configuration options
-    /// - Returns: A new Toast view with the configured layout
     @MainActor public static func text(
         _ title: String,
         subtitle: String? = nil,
@@ -58,14 +47,6 @@ public class Toast {
         return self.init(view: view, config: config)
     }
     
-    /// Creates a new Toast with the default Apple style layout with an icon, title and optional subtitle.
-    /// - Parameters:
-    ///   - image: Image which is displayed in the toast view
-    ///   - imageTint: Tint of the image
-    ///   - title: Attributed title which is displayed in the toast view
-    ///   - subtitle: Optional attributed subtitle which is displayed in the toast view
-    ///   - config: Configuration options
-    /// - Returns: A new Toast view with the configured layout
     @MainActor public static func `default`(
         image: UIImage,
         imageTint: UIColor? = defaultImageTint,
@@ -81,14 +62,6 @@ public class Toast {
         return self.init(view: view, config: config)
     }
     
-    /// Creates a new Toast with the default Apple style layout with an icon, title and optional subtitle.
-    /// - Parameters:
-    ///   - image: Image which is displayed in the toast view
-    ///   - imageTint: Tint of the image
-    ///   - title: Title which is displayed in the toast view
-    ///   - subtitle: Optional subtitle which is displayed in the toast view
-    ///   - config: Configuration options
-    /// - Returns: A new Toast view with the configured layout
     @MainActor public static func `default`(
         image: UIImage,
         imageTint: UIColor? = defaultImageTint,
@@ -104,11 +77,6 @@ public class Toast {
         return self.init(view: view, config: config)
     }
     
-    /// Creates a new Toast with a custom view
-    /// - Parameters:
-    ///   - view: A view which is displayed when the toast is shown
-    ///   - config: Configuration options
-    /// - Returns: A new Toast view with the configured layout
     @MainActor public static func custom(
         view: ToastView,
         config: ToastConfiguration = ToastConfiguration()
@@ -116,11 +84,6 @@ public class Toast {
         return self.init(view: view, config: config)
     }
     
-    /// Creates a new Toast with a custom view
-    /// - Parameters:
-    ///   - view: A view which is displayed when the toast is shown
-    ///   - config: Configuration options
-    /// - Returns: A new Toast view with the configured layout
     @MainActor public required init(view: ToastView, config: ToastConfiguration) {
         self.config = config
         self.view = view
@@ -140,18 +103,12 @@ public class Toast {
     }
     
 #if !os(tvOS) && !os(visionOS)
-    /// Show the toast with haptic feedback
-    /// - Parameters:
-    ///   - type: Haptic feedback type
-    ///   - time: Time after which the toast is shown
     @MainActor public func show(haptic type: UINotificationFeedbackGenerator.FeedbackType, after time: TimeInterval = 0) {
         UINotificationFeedbackGenerator().notificationOccurred(type)
         show(after: time)
     }
 #endif
     
-    /// Show the toast
-    /// - Parameter delay: Time after which the toast is shown
     @MainActor public func show(after delay: TimeInterval = 0) {
         if let backgroundView = self.createBackgroundView() {
             self.backgroundView = backgroundView
@@ -190,10 +147,6 @@ public class Toast {
         }
     }
     
-    /// Close the toast
-    /// - Parameters:
-    ///   - completion: A completion handler which is invoked after the toast is hidden
-    ///   - animated: A Boolean value that determines whether to apply animation.
     @MainActor public func close(animated: Bool = true, completion: (() -> Void)? = nil) {
         multicast.invoke { $0.willCloseToast(self) }
 
@@ -234,9 +187,7 @@ public class Toast {
         }
     }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    required init?(coder: NSCoder) { nil }
 }
 
 public extension Toast {
