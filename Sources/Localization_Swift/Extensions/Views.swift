@@ -14,7 +14,8 @@ public extension PlatformView {
         endPoint: UnitPoint = .trailing,
         cornerRadius: CGFloat = 12,
         shimmer: Bool = true,
-        breathing: Bool = true
+        breathing: Bool = true,
+        scalingEffect: Bool = true
     ) -> PlatformView {
         let rootView = GradientBackgroundView(
             colors: colors,
@@ -22,7 +23,8 @@ public extension PlatformView {
             endPoint: endPoint,
             cornerRadius: cornerRadius,
             shimmer: shimmer,
-            breathing: breathing
+            breathing: breathing,
+            scalingEffect: scalingEffect
         )
 
         #if os(iOS)
@@ -30,7 +32,7 @@ public extension PlatformView {
         hostingController.view.backgroundColor = .clear
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
         insertSubview(hostingController.view, at: 0)
-        let hostedView = hostingController.view!
+        guard let hostedView = hostingController.view else { return self }
 
         #elseif os(macOS)
         let hostingView = NSHostingView(rootView: rootView)
