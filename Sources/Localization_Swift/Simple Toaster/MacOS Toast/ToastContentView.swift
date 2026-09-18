@@ -14,14 +14,12 @@ struct ToastView: View {
             Text(message)
                 .multilineTextAlignment(.leading)
                 .foregroundStyle(textColor)
-                .frame(minWidth: 230, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+                .fixedSize()
         } else {
             Text(message)
                 .multilineTextAlignment(.leading)
                 .foregroundColor(textColor)
-                .frame(minWidth: 230, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
+                .fixedSize()
         }
     }
 
@@ -54,7 +52,7 @@ struct ToastView: View {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.primary.opacity(0.1), lineWidth: 0.1)
         )
-        .frame(maxWidth: 300)
+        .fixedSize()
     }
 }
 #endif
