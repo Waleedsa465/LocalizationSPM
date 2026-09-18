@@ -14,13 +14,13 @@ struct ToastView: View {
             Text(message)
                 .multilineTextAlignment(.leading)
                 .foregroundStyle(textColor)
-                .frame(width: 230, alignment: .leading)
+                .frame(minWidth: 230, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
         } else {
             Text(message)
                 .multilineTextAlignment(.leading)
                 .foregroundColor(textColor)
-                .frame(width: 230, alignment: .leading)
+                .frame(minWidth: 230, alignment: .leading)
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
