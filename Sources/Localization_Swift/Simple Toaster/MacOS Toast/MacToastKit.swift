@@ -9,6 +9,27 @@ public class ToastWindowController {
     
     private var panel: NSPanel?
 
+    // MARK: Toast Sizing
+
+    private let minPillWidth: CGFloat = 100
+    private let maxPillWidth: CGFloat = 300
+    private let horizontalPadding: CGFloat = 40 // 20pt leading + 20pt trailing
+    private let iconReservedWidth: CGFloat = 28 // 16pt icon + 12pt spacing
+
+    private func textWidth(for message: String, hasIcon: Bool) -> CGFloat {
+        let reserved = horizontalPadding + (hasIcon ? iconReservedWidth : 0)
+        let minTextWidth = max(minPillWidth - reserved, 20)
+        let maxTextWidth = max(maxPillWidth - reserved, minTextWidth)
+
+        let font = NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        let naturalWidth = (message as NSString)
+            .size(withAttributes: [.font: font])
+            .width
+            .rounded(.up)
+
+        return min(max(naturalWidth, minTextWidth), maxTextWidth)
+    }
+
     // MARK: Toast Positions
 
     public enum ToastPosition {
@@ -43,7 +64,7 @@ public class ToastWindowController {
 
         guard let panel = panel else { return }
 
-        let toastView = ToastView(message: message, textColor: textColor, viewBackGroundColor: viewBackGroundColor, icon: icon, panel: panel)
+        let toastView = ToastView(message: message, textColor: textColor, viewBackGroundColor: viewBackGroundColor, icon: icon, panel: panel, textWidth: textWidth(for: message, hasIcon: icon != nil))
         let hostingView = NSHostingView(rootView: toastView)
         let fittingSize = hostingView.fittingSize
         hostingView.frame = NSRect(origin: .zero, size: fittingSize)

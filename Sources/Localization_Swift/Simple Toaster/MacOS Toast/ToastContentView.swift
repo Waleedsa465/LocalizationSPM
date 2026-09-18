@@ -7,19 +7,22 @@ struct ToastView: View {
     let viewBackGroundColor: Color
     let icon: Image?
     weak var panel: NSPanel?
-    
+    let textWidth: CGFloat
+
     @ViewBuilder
     private var messageText: some View {
         if #available(macOS 12.0, *) {
             Text(message)
                 .multilineTextAlignment(.leading)
                 .foregroundStyle(textColor)
-                .fixedSize()
+                .frame(width: textWidth, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
         } else {
             Text(message)
                 .multilineTextAlignment(.leading)
                 .foregroundColor(textColor)
-                .fixedSize()
+                .frame(width: textWidth, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -52,7 +55,6 @@ struct ToastView: View {
             RoundedRectangle(cornerRadius: 20)
                 .stroke(Color.primary.opacity(0.1), lineWidth: 0.1)
         )
-        .fixedSize()
     }
 }
 #endif
