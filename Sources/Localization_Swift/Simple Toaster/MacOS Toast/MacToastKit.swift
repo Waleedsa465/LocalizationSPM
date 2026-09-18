@@ -24,18 +24,12 @@ public class ToastWindowController {
     // MARK: Show Toast Function
     public func showToast(message: String,icon: Image? = nil,duration: TimeInterval? = nil,position: ToastPosition = .bottomCenter(100),textColor: Color ,viewBackGroundColor: Color) {
         if panel == nil {
-            let toastView = ToastView(message: message, textColor: textColor, viewBackGroundColor: viewBackGroundColor, icon: icon, panel: nil)
-
-            let hostingView = NSHostingView(rootView: toastView)
-            hostingView.frame = NSRect(x: 0, y: 0, width: 300, height: 50)
-
-            panel = NSPanel(contentRect: hostingView.frame,
+            panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 300, height: 50),
                             styleMask: [.nonactivatingPanel],
                             backing: .buffered,
                             defer: false)
 
             if let panel = panel {
-                panel.contentView = hostingView
                 panel.isFloatingPanel = true
                 panel.level = .floating
                 panel.backgroundColor = .clear
@@ -44,14 +38,21 @@ public class ToastWindowController {
                 panel.ignoresMouseEvents = false
                 panel.hidesOnDeactivate = false
                 panel.collectionBehavior = [.canJoinAllSpaces, .transient, .ignoresCycle]
-
-                hostingView.rootView = ToastView(message: message, textColor: textColor, viewBackGroundColor: viewBackGroundColor, icon: icon, panel: panel)
             }
         }
 
+        guard let panel = panel else { return }
+
+        let toastView = ToastView(message: message, textColor: textColor, viewBackGroundColor: viewBackGroundColor, icon: icon, panel: panel)
+        let hostingView = NSHostingView(rootView: toastView)
+        let fittingSize = hostingView.fittingSize
+        hostingView.frame = NSRect(origin: .zero, size: fittingSize)
+        panel.contentView = hostingView
+        panel.setContentSize(fittingSize)
+
         // MARK: Position Calculations
 
-        if let screenFrame = NSScreen.main?.visibleFrame, let panel = panel {
+        if let screenFrame = NSScreen.main?.visibleFrame {
             let x: CGFloat
             let y: CGFloat
 
