@@ -31,14 +31,14 @@ public struct ShadowView: View {
     
     public var body: some View {
         shape
-            .fill(shadowColor.opacity(opacity))
+            .fill(shadowColor.opacity(opacity))   // only the shadow colour
             .shadow(
                 color: shadowColor.opacity(opacity),
                 radius: radius,
                 x: offset.width,
                 y: offset.height
             )
-            .overlay(shape.blendMode(.destinationOut))
+//            .overlay(shape.blendMode(.destinationOut)) // punch a hole
             .compositingGroup()
             .padding(shadowInset)
     }
