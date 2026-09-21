@@ -44,6 +44,8 @@ public struct ShadowView: View {
                     x: offset.width,
                     y: offset.height
                 )
+                .overlay(shape.blendMode(.destinationOut))
+                .compositingGroup()
 
             shape
                 .fill(fillColor)
