@@ -76,25 +76,6 @@ public extension PlatformView {
 
         return hostedView
     }
-
-    @discardableResult
-    func embedShadowBackground(
-        shadowColor: Color,
-        cornerRadius: CGFloat = 12,
-        radius: CGFloat = 12,
-        offset: CGSize = .zero,
-        opacity: Double = 0.35
-    ) -> PlatformView {
-        let rootView = ShadowView(
-            shadowColor: shadowColor,
-            cornerRadius: cornerRadius,
-            radius: radius,
-            offset: offset,
-            opacity: opacity
-        )
-
-        return addHostedView(rootView, inset: rootView.shadowInset)
-    }
     
     @discardableResult
     func embedGradientBackground(
