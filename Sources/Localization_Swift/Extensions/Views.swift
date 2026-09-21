@@ -9,7 +9,7 @@ import AppKit
 public extension PlatformView {
     
     @discardableResult
-    func addHostedView<Content: View>(_ swiftUIView: Content) -> PlatformView {
+    func addHostedView<Content: View>(_ swiftUIView: Content, inset: CGFloat = 0) -> PlatformView {
 #if os(iOS)
         let hostingController = UIHostingController(rootView: swiftUIView)
         hostingController.view.backgroundColor = .clear
@@ -23,15 +23,36 @@ public extension PlatformView {
         addSubview(hostingView)
         let hostedView = hostingView
 #endif
-        
+
         NSLayoutConstraint.activate([
-            hostedView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            hostedView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            hostedView.topAnchor.constraint(equalTo: topAnchor),
-            hostedView.bottomAnchor.constraint(equalTo: bottomAnchor)
+            hostedView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: -inset),
+            hostedView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: inset),
+            hostedView.topAnchor.constraint(equalTo: topAnchor, constant: -inset),
+            hostedView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: inset)
         ])
-        
+
         return hostedView
+    }
+
+    @discardableResult
+    func embedShadowBackground(
+        fillColor: Color,
+        shadowColor: Color,
+        cornerRadius: CGFloat = 12,
+        radius: CGFloat = 12,
+        offset: CGSize = .zero,
+        opacity: Double = 0.35
+    ) -> PlatformView {
+        let rootView = ShadowView(
+            fillColor: fillColor,
+            shadowColor: shadowColor,
+            cornerRadius: cornerRadius,
+            radius: radius,
+            offset: offset,
+            opacity: opacity
+        )
+
+        return addHostedView(rootView, inset: rootView.shadowInset)
     }
     
     @discardableResult

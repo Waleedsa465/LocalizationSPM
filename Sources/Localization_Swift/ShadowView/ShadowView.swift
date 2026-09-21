@@ -26,6 +26,10 @@ public struct ShadowView: View {
         self.opacity = opacity
     }
     
+    public var shadowInset: CGFloat {
+        radius + max(abs(offset.width), abs(offset.height))
+    }
+
     public var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
             .fill(fillColor)
@@ -35,5 +39,6 @@ public struct ShadowView: View {
                 x: offset.width,
                 y: offset.height
             )
+            .padding(shadowInset)
     }
 }
