@@ -30,15 +30,24 @@ public struct ShadowView: View {
         radius + max(abs(offset.width), abs(offset.height))
     }
 
-    public var body: some View {
+    private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .fill(fillColor)
-            .shadow(
-                color: shadowColor.opacity(opacity),
-                radius: radius,
-                x: offset.width,
-                y: offset.height
-            )
-            .padding(shadowInset)
+    }
+
+    public var body: some View {
+        ZStack {
+            shape
+                .fill(shadowColor)
+                .shadow(
+                    color: shadowColor.opacity(opacity),
+                    radius: radius,
+                    x: offset.width,
+                    y: offset.height
+                )
+
+            shape
+                .fill(fillColor)
+        }
+        .padding(shadowInset)
     }
 }
