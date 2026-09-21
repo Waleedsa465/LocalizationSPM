@@ -1,24 +1,19 @@
-import Foundation
 import SwiftUI
 
 public struct ShadowView: View {
-    
-    public var fillColor: Color
     public var shadowColor: Color
-    public var cornerRadius: CGFloat = 12
-    public var radius: CGFloat = 12
-    public var offset: CGSize = .zero
-    public var opacity: Double = 0.35
+    public var cornerRadius: CGFloat
+    public var radius: CGFloat
+    public var offset: CGSize
+    public var opacity: Double
     
     public init(
-        fillColor: Color,
-        shadowColor: Color,
+        shadowColor: Color = .black,
         cornerRadius: CGFloat = 12,
         radius: CGFloat = 12,
         offset: CGSize = .zero,
         opacity: Double = 0.35
     ) {
-        self.fillColor = fillColor
         self.shadowColor = shadowColor
         self.cornerRadius = cornerRadius
         self.radius = radius
@@ -29,23 +24,22 @@ public struct ShadowView: View {
     public var shadowInset: CGFloat {
         radius + max(abs(offset.width), abs(offset.height))
     }
-
-    private var shape: EmptyView {
-        EmptyView()
+    
+    private var shape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
     }
-
+    
     public var body: some View {
-        ZStack {
-            shape
-                .shadow(
-                    color: shadowColor.opacity(opacity),
-                    radius: radius,
-                    x: offset.width,
-                    y: offset.height
-                )
-                .overlay(shape.blendMode(.destinationOut))
-                .compositingGroup()
-        }
-        .padding(shadowInset)
+        shape
+            .fill(shadowColor.opacity(opacity))
+            .shadow(
+                color: shadowColor.opacity(opacity),
+                radius: radius,
+                x: offset.width,
+                y: offset.height
+            )
+            .overlay(shape.blendMode(.destinationOut))
+            .compositingGroup()
+            .padding(shadowInset)
     }
 }

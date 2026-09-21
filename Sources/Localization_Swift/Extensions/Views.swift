@@ -79,7 +79,6 @@ public extension PlatformView {
 
     @discardableResult
     func embedShadowBackground(
-        fillColor: Color,
         shadowColor: Color,
         cornerRadius: CGFloat = 12,
         radius: CGFloat = 12,
@@ -87,7 +86,6 @@ public extension PlatformView {
         opacity: Double = 0.35
     ) -> PlatformView {
         let rootView = ShadowView(
-            fillColor: fillColor,
             shadowColor: shadowColor,
             cornerRadius: cornerRadius,
             radius: radius,
