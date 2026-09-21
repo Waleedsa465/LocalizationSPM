@@ -29,27 +29,19 @@ public struct ShadowView: View {
     public var shadowInset: CGFloat {
         radius + max(abs(offset.width), abs(offset.height))
     }
-
+    
     private var shape: RoundedRectangle {
         RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
     }
-
+    
     public var body: some View {
-        ZStack {
-            shape
-                .fill(shadowColor)
-                .shadow(
-                    color: shadowColor.opacity(opacity),
-                    radius: radius,
-                    x: offset.width,
-                    y: offset.height
-                )
-                .overlay(shape.blendMode(.destinationOut))
-                .compositingGroup()
-
-            shape
-                .fill(fillColor)
-        }
-        .padding(shadowInset)
+        Color.clear
+            .shadow(
+                color: shadowColor.opacity(opacity),
+                radius: radius,
+                x: offset.width,
+                y: offset.height
+            )
+            .padding(shadowInset)
     }
 }
