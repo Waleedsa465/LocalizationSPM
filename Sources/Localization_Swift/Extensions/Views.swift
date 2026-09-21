@@ -20,6 +20,7 @@ public extension PlatformView {
 #elseif os(macOS)
         let hostingView = NSHostingView(rootView: swiftUIView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
+        hostingView.layer?.backgroundColor = .clear
         addSubview(hostingView)
         let hostedView = hostingView
 #endif
@@ -85,6 +86,7 @@ public extension PlatformView {
 #elseif os(macOS)
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
+        hostingView.layer?.backgroundColor = .clear
         addSubview(hostingView, positioned: .below, relativeTo: subviews.first)
         let hostedView = hostingView
 #endif
