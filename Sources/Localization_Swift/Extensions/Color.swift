@@ -5,7 +5,7 @@ import SwiftUI
 #if canImport(AppKit)
 import AppKit
 
-public extension NSColor {
+public extension PlatformColor {
     convenience init?(hex: String) {
         var hexString = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if hexString.hasPrefix("#") {
@@ -34,7 +34,7 @@ public extension NSColor {
 #if canImport(UIKit)
 import UIKit
 
-public extension UIColor {
+public extension PlatformColor {
     convenience init?(hex: String) {
         var hexFormatted = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         if hexFormatted.hasPrefix("#") {

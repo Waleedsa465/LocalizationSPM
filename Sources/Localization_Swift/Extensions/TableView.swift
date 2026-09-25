@@ -1,9 +1,7 @@
 #if os(iOS)
 import UIKit
-typealias PlatformTableView = UITableView
 #elseif os(macOS)
 import Cocoa
-typealias PlatformTableView = NSTableView
 #endif
 
 public extension PlatformTableView {

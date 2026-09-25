@@ -2,12 +2,10 @@ import Foundation
 
 #if canImport(UIKit)
 import UIKit
-public typealias PlatformViewController = UIViewController
-public typealias PlatformView = UIView
+
 #elseif canImport(AppKit)
 import AppKit
-public typealias PlatformViewController = NSViewController
-public typealias PlatformView = NSView
+
 #endif
 
 #if canImport(UIKit)

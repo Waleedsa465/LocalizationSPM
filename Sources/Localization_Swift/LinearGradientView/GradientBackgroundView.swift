@@ -4,6 +4,7 @@ import SwiftUI
 public struct GradientBackgroundView: View {
 
     var colors: [Color]
+    var shimmerColors: [Color]
     var startPoint: UnitPoint = .leading
     var endPoint: UnitPoint = .trailing
     var cornerRadius: CGFloat = 12
@@ -21,6 +22,7 @@ public struct GradientBackgroundView: View {
 
     public init(
         colors: [Color],
+        shimmerColors: [Color],
         startPoint: UnitPoint = .leading,
         endPoint: UnitPoint = .trailing,
         cornerRadius: CGFloat = 12,
@@ -29,6 +31,7 @@ public struct GradientBackgroundView: View {
         scalingEffect: Bool = true
     ) {
         self.colors = colors
+        self.shimmerColors = shimmerColors
         self.startPoint = startPoint
         self.endPoint = endPoint
         self.cornerRadius = cornerRadius

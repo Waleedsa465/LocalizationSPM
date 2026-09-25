@@ -80,6 +80,7 @@ public extension PlatformView {
     @discardableResult
     func embedGradientBackground(
         colors: [Color],
+        shimmerColors: [Color] = [.white.opacity(0.35),.white.opacity(0.0),.white.opacity(0.18)],
         startPoint: UnitPoint = .leading,
         endPoint: UnitPoint = .trailing,
         cornerRadius: CGFloat = 12,
@@ -89,6 +90,7 @@ public extension PlatformView {
     ) -> PlatformView {
         let rootView = GradientBackgroundView(
             colors: colors,
+            shimmerColors: shimmerColors,
             startPoint: startPoint,
             endPoint: endPoint,
             cornerRadius: cornerRadius,
