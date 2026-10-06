@@ -97,3 +97,33 @@ public struct GradientBackgroundView: View {
         }
     }
 }
+
+// MARK: - View modifier
+
+public struct ShimmerEffectModifier: ViewModifier {
+    var colors: [Color]
+    var shimmerColors: [Color]
+    var startPoint: UnitPoint
+    var endPoint: UnitPoint
+    var cornerRadius: CGFloat
+    var shimmer: Bool
+    var breathing: Bool
+    var scalingEffect: Bool
+    var shimmerTimer: TimeInterval
+
+    public func body(content: Content) -> some View {
+        content.background {
+            GradientBackgroundView(
+                colors: colors,
+                shimmerColors: shimmerColors,
+                startPoint: startPoint,
+                endPoint: endPoint,
+                cornerRadius: cornerRadius,
+                shimmer: shimmer,
+                breathing: breathing,
+                scalingEffect: scalingEffect,
+                shimmerTimer: shimmerTimer
+            )
+        }
+    }
+}

@@ -126,3 +126,29 @@ public extension PlatformView {
         return hostedView
     }
 }
+
+public extension View {
+    func addShimmerAndBreathingEffect(
+        colors: [Color],
+        shimmerColors: [Color] = [.white.opacity(0.35),.white.opacity(0.0),.white.opacity(0.18)],
+        startPoint: UnitPoint = .leading,
+        endPoint: UnitPoint = .trailing,
+        cornerRadius: CGFloat = 12,
+        shimmer: Bool = true,
+        breathing: Bool = true,
+        scalingEffect: Bool = true,
+        shimmerTimer: TimeInterval = 2.4
+    ) -> some View {
+        modifier(ShimmerEffectModifier(
+            colors: colors,
+            shimmerColors: shimmerColors,
+            startPoint: startPoint,
+            endPoint: endPoint,
+            cornerRadius: cornerRadius,
+            shimmer: shimmer,
+            breathing: breathing,
+            scalingEffect: scalingEffect,
+            shimmerTimer: shimmerTimer
+        ))
+    }
+}
