@@ -6,17 +6,7 @@ import UIKit
 import AppKit
 #endif
 
-public extension View {
-    func dropShadow(
-        color: Color = .black.opacity(0.2),
-        radius: CGFloat = 10,
-        x: CGFloat = 0,
-        y: CGFloat = 5
-    ) -> some View {
-        self.shadow(color: color, radius: radius, x: x, y: y)
-    }
-}
-
+// MARK: - Uikit + AppKit Views Extension
 public extension PlatformView {
     
     @discardableResult
@@ -127,6 +117,7 @@ public extension PlatformView {
     }
 }
 
+// MARK: - Swift Ui Views Extension
 public extension View {
     func addShimmerAndBreathingEffect(
         colors: [Color],
@@ -150,5 +141,13 @@ public extension View {
             scalingEffect: scalingEffect,
             shimmerTimer: shimmerTimer
         ))
+    }
+    func dropShadow(
+        color: Color = .black.opacity(0.2),
+        radius: CGFloat = 10,
+        x: CGFloat = 0,
+        y: CGFloat = 5
+    ) -> some View {
+        self.shadow(color: color, radius: radius, x: x, y: y)
     }
 }

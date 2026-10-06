@@ -1,6 +1,6 @@
 # Localization_Swift
 
-A Swift Package with localization utilities plus a grab-bag of UIKit/AppKit/SwiftUI helpers: gradient & shadow background views, iOS/macOS toasts, a growing text view, proxy monitoring, and common Foundation/UIKit/AppKit extensions.
+A Swift Package with localization utilities plus a grab-bag of UIKit/AppKit/SwiftUI helpers: an animated gradient/shimmer background, a SwiftUI loader and progress HUD, iOS/macOS toasts, a growing text view, proxy monitoring, color helpers, and common Foundation/UIKit/AppKit extensions.
 
 - **Platforms:** iOS 15+, macOS 12+
 - **Swift tools version:** 6.0
@@ -80,9 +80,7 @@ LocalizationUtility.localizeViewHierarchy(view: self.view)
 LocalizationUtility.resetToLocalizationKeys(view: self.view)
 ```
 
-## SwiftUI background views
-
-Both views expose fully `public` properties so you can configure or extend them freely from your own app target.
+## SwiftUI
 
 ### GradientBackgroundView
 
@@ -91,6 +89,7 @@ An animated gradient background with optional shimmer, breathing (pulse), and sc
 ```swift
 GradientBackgroundView(
     colors: [.blue, .purple],
+    shimmerColors: [],
     startPoint: .leading,
     endPoint: .trailing,
     cornerRadius: 16,
@@ -100,36 +99,78 @@ GradientBackgroundView(
 )
 ```
 
-### ShadowView
+### Shimmer view modifier
 
-A filled rounded rectangle with a configurable drop shadow. Its `shadowInset` (`radius + max(|offset.x|, |offset.y|)`) reports how much extra space the shadow needs so it isn't clipped when the view is inset exactly to its content's edges.
+Puts `GradientBackgroundView` behind any view (backed by the public `ShimmerEffectModifier`):
 
 ```swift
-ShadowView(
-    fillColor: .white,
-    shadowColor: .black,
-    cornerRadius: 16,
-    radius: 12,
-    offset: CGSize(width: 0, height: 4),
-    opacity: 0.35
-)
+Text("Upgrade")
+    .padding()
+    .addShimmerAndBreathingEffect(colors: [.purple, .blue], cornerRadius: 20)
+```
+
+Optional parameters: `shimmerColors`, `startPoint`, `endPoint`, `cornerRadius`, `shimmer`, `breathing`, `scalingEffect`, `shimmerTimer`.
+
+### Loader (`.loader`)
+
+A pure SwiftUI loader driven by a `@State` flag. While it is showing, the content is disabled and a window-level blocker swallows all touches/clicks, including the navigation bar, toolbar, tab bar and swipe-back (iOS) and the titlebar/toolbar (macOS).
+
+```swift
+@State private var isLoading = false
+
+ContentView()
+    .loader(isLoading: $isLoading, message: "Loading…")
+```
+
+Optional parameters: `message`, `tint`, `dimOpacity`. On macOS, keyboard shortcuts and menu commands are not blocked.
+
+### Progress HUD
+
+An MBProgressHUD-style HUD for UIKit/AppKit views, plus a SwiftUI wrapper:
+
+```swift
+// UIKit / AppKit
+ProgressHudUtility.shared.showHUD(on: view)
+ProgressHudUtility.shared.hideHUD(view: view)
+
+// SwiftUI
+SomeView().progressHUD(isShowing: $isShowing)
+```
+
+Prefer `.loader(isLoading:)` when you also need to block interaction.
+
+### Drop shadow
+
+```swift
+Text("Hi").dropShadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)   // SwiftUI View
+someView.dropShadow(color: .black, opacity: 0.2, radius: 10)                  // UIView / NSView
 ```
 
 ### Hosting a SwiftUI view inside UIKit/AppKit
 
-`PlatformView` (a `UIView` on iOS, `NSView` on macOS) gets a generic hosting helper plus two ready-made convenience wrappers:
+`PlatformView` (a `UIView` on iOS, `NSView` on macOS) gets a generic hosting helper and a gradient convenience:
 
 ```swift
-// Host any SwiftUI view, optionally expanding its frame beyond `self`'s
-// bounds by `inset` (useful for content like shadows that draws outside
-// its own layout frame).
+// Host any SwiftUI view, optionally expanding its frame by `inset`
 someView.addHostedView(MyCustomSwiftUIView(), inset: 8)
 
 // Gradient background, inserted behind existing subviews
 someView.embedGradientBackground(colors: [.blue, .purple])
+```
 
-// Drop-shadow background (inset is computed for you)
-someView.embedShadowBackground(fillColor: .white, shadowColor: .black)
+## Colors
+
+Cross-platform hex helpers for `Color`, `UIColor` and `NSColor`. Supported formats: `RGB`, `RRGGBB`, `RRGGBBAA` (with or without `#`). Invalid input falls back to clear.
+
+```swift
+Color(hex: "#FF8000")
+Color(hex: "#FF8000CC")
+Color(hex: "#FF8000", alpha: 0.5)    // alpha overrides the hex alpha
+Color(r: 255, g: 128, b: 0)
+
+PlatformColor(hex: "#FF8000")        // UIColor / NSColor
+color.hexString                      // "#FF8000CC" (alpha included when < 1)
+color.hex6                           // "#FF8000"
 ```
 
 ## Toasts
@@ -192,11 +233,15 @@ A selection of the included extensions:
 
 - **`String`** — `localized()`, `localizedFormat(_:)`, `localizedPlural(_:)`, `truncateName(maxLength:)`, `chunked(by:)`, `convertHtml()`, `extractBase64()`, `cleanedJsonString`
 - **`Array` / `Sequence`** — convenience helpers for common collection operations
-- **`URL`, `Bundle`, `Encodable`** — small utility helpers
-- **`Color`, `UIColor`, `NSColor`** — cross-platform color helpers
-- **`PlatformImage` / `PlatformImageView`** — `UIImage`/`NSImage` and `UIImageView`/`NSImageView` type aliases with shared helpers
-- **`PlatformView` / `PlatformViewController`** — `UIView`/`NSView` and `UIViewController`/`NSViewController` type aliases, including animated child-view-controller embedding (`addChildViewControllerWithAnimation`, `removeChildFromNavigation`)
-- **`PlatformTableView`, `NSItemProvider`** — table view and drag/drop helpers
+- **`URL`** — `truncatedFileName(maxLength:)`
+- **`Bundle`** — `appVersion`, `buildNumber`, `fullVersion`
+- **`Encodable`** — `toDictionary()`
+- **`Array`** — `asyncCompactMap`
+- **`Color`, `UIColor`, `NSColor`** — hex init and `hexString` / `hex6` (see Colors)
+- **`PlatformImage` / `PlatformImageView`** — `UIImage`/`NSImage` and `UIImageView`/`NSImageView` type aliases with shared helpers (`resize`, `resizeMaintainingAspectRatio`, `pngRepresentation`, `savePngTo`)
+- **`PlatformView` / `PlatformViewController`** — `UIView`/`NSView` and `UIViewController`/`NSViewController` type aliases, including animated child-view-controller embedding (`addChildViewControllerWithAnimation`, `addChildViewControllerWithOutAnimation`, `removeChildFromNavigation`)
+- **`PlatformTableView`** — `reloadVisibleCurrentRows()`
+- **`NSItemProvider`** — async image/data loading for drag & drop (`loadImage`, `loadDataSafely`)
 
 macOS-only helper classes are also included: `DraggableImageView` + `QuickLookHandler` (drag-out + Quick Look preview for images), `NonClickableView`, and `NoArrowKeysCollectionView`.
 
