@@ -86,7 +86,8 @@ public extension PlatformView {
         cornerRadius: CGFloat = 12,
         shimmer: Bool = true,
         breathing: Bool = true,
-        scalingEffect: Bool = true
+        scalingEffect: Bool = true,
+        shimmerTimer: TimeInterval = 2.4
     ) -> PlatformView {
         let rootView = GradientBackgroundView(
             colors: colors,
@@ -96,7 +97,8 @@ public extension PlatformView {
             cornerRadius: cornerRadius,
             shimmer: shimmer,
             breathing: breathing,
-            scalingEffect: scalingEffect
+            scalingEffect: scalingEffect,
+            shimmerTimer: shimmerTimer
         )
         
 #if os(iOS)

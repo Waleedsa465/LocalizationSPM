@@ -8,6 +8,7 @@ public struct GradientBackgroundView: View {
     var startPoint: UnitPoint = .leading
     var endPoint: UnitPoint = .trailing
     var cornerRadius: CGFloat = 12
+    var shimmerTimer: TimeInterval = 2.4
 
     var shimmer: Bool = true
     var breathing: Bool = true
@@ -28,7 +29,8 @@ public struct GradientBackgroundView: View {
         cornerRadius: CGFloat = 12,
         shimmer: Bool = true,
         breathing: Bool = true,
-        scalingEffect: Bool = true
+        scalingEffect: Bool = true,
+        shimmerTimer: TimeInterval = 2.4
     ) {
         self.colors = colors
         self.shimmerColors = shimmerColors
@@ -38,6 +40,7 @@ public struct GradientBackgroundView: View {
         self.shimmer = shimmer
         self.breathing = breathing
         self.scalingEffect = scalingEffect
+        self.shimmerTimer = shimmerTimer
     }
     
     private var currentScale: CGFloat {
@@ -87,7 +90,7 @@ public struct GradientBackgroundView: View {
             if breathing { isBreathing = true }
             if shimmer {
                 shimmerPulse = 0
-                withAnimation(.easeOut(duration: 2.4).repeatForever(autoreverses: false)) {
+                withAnimation(.easeOut(duration: shimmerTimer).repeatForever(autoreverses: false)) {
                     shimmerPulse = 1
                 }
             }
