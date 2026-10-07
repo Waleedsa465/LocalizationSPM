@@ -83,68 +83,6 @@ private struct WindowBlocker: UIViewRepresentable {
     func updateUIView(_ view: BlockerHostView, context: Context) { view.config = config }
     static func dismantleUIView(_ view: BlockerHostView, coordinator: ()) { view.config.isBlocking = false }
 }
-#elseif os(macOS)
-private final class WindowBlockerView: NSView {
-    override func hitTest(_ point: NSPoint) -> NSView? { self }
-    override var acceptsFirstResponder: Bool { true }
-    override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
-    override func mouseDown(with event: NSEvent) {}
-    override func rightMouseDown(with event: NSEvent) {}
-    override func otherMouseDown(with event: NSEvent) {}
-    override func scrollWheel(with event: NSEvent) {}
-}
-
-private final class BlockerHostView: NSView {
-    var config = Config() { didSet { sync() } }
-    private var blocker: WindowBlockerView?
-    private var hosting: NSHostingView<LoaderCard>?
-    
-    struct Config: Equatable {
-        var isBlocking = false
-        var message: String?
-        var dimOpacity: Double = 0.25
-        var tint: Color = .accentColor
-    }
-    
-    override func viewDidMoveToWindow() { super.viewDidMoveToWindow(); sync() }
-    
-    private func sync() {
-        if config.isBlocking, let container = window?.contentView {
-            let card = LoaderCard(message: config.message, tint: config.tint)
-            if let blocker {
-                blocker.layer?.backgroundColor = NSColor.black.withAlphaComponent(config.dimOpacity).cgColor
-                hosting?.rootView = card
-                return
-            }
-            let view = WindowBlockerView(frame: container.bounds)
-            view.autoresizingMask = [.width, .height]
-            view.wantsLayer = true
-            view.layer?.backgroundColor = NSColor.black.withAlphaComponent(config.dimOpacity).cgColor
-            let host = NSHostingView(rootView: card)
-            host.frame = view.bounds
-            host.autoresizingMask = [.width, .height]
-            view.addSubview(host)
-            view.alphaValue = 0
-            container.addSubview(view, positioned: .above, relativeTo: nil)
-            window?.makeFirstResponder(view)
-            NSAnimationContext.runAnimationGroup { $0.duration = 0.2; view.animator().alphaValue = 1 }
-            blocker = view
-            hosting = host
-        } else if let old = blocker {
-            blocker = nil
-            hosting = nil
-            NSAnimationContext.runAnimationGroup({ $0.duration = 0.2; old.animator().alphaValue = 0 },
-                                                 completionHandler: { MainActor.assumeIsolated { old.removeFromSuperview() } })
-        }
-    }
-}
-
-private struct WindowBlocker: NSViewRepresentable {
-    let config: BlockerHostView.Config
-    func makeNSView(context: Context) -> BlockerHostView { BlockerHostView() }
-    func updateNSView(_ view: BlockerHostView, context: Context) { view.config = config }
-    static func dismantleNSView(_ view: BlockerHostView, coordinator: ()) { view.config.isBlocking = false }
-}
 #endif
 
 // MARK: - Modifier
@@ -155,6 +93,7 @@ public struct LoaderModifier: ViewModifier {
     var tint: Color
     var dimOpacity: Double
     
+    #if os(iOS)
     public func body(content: Content) -> some View {
         content
             .disabled(isLoading)
@@ -163,6 +102,26 @@ public struct LoaderModifier: ViewModifier {
                                             dimOpacity: dimOpacity, tint: tint))
             )
     }
+    #else
+    // macOS: a plain SwiftUI overlay. Adding views to the window hierarchy from an NSViewRepresentable
+    // is unsupported inside NSHostingController (AppKit warns and the view may not appear).
+    public func body(content: Content) -> some View {
+        content
+            .disabled(isLoading)
+            .overlay {
+                if isLoading {
+                    ZStack {
+                        Color.black.opacity(dimOpacity)
+                        LoaderCard(message: message, tint: tint)
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {}
+                    .transition(.opacity)
+                }
+            }
+            .animation(.easeInOut(duration: 0.2), value: isLoading)
+    }
+    #endif
 }
 
 public extension View {
