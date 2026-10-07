@@ -109,14 +109,14 @@ private final class BlockerHostView: NSView {
     override func viewDidMoveToWindow() { super.viewDidMoveToWindow(); sync() }
     
     private func sync() {
-        if config.isBlocking, let frameView = window?.contentView?.superview {
+        if config.isBlocking, let container = window?.contentView {
             let card = LoaderCard(message: config.message, tint: config.tint)
             if let blocker {
                 blocker.layer?.backgroundColor = NSColor.black.withAlphaComponent(config.dimOpacity).cgColor
                 hosting?.rootView = card
                 return
             }
-            let view = WindowBlockerView(frame: frameView.bounds)
+            let view = WindowBlockerView(frame: container.bounds)
             view.autoresizingMask = [.width, .height]
             view.wantsLayer = true
             view.layer?.backgroundColor = NSColor.black.withAlphaComponent(config.dimOpacity).cgColor
@@ -125,7 +125,7 @@ private final class BlockerHostView: NSView {
             host.autoresizingMask = [.width, .height]
             view.addSubview(host)
             view.alphaValue = 0
-            frameView.addSubview(view, positioned: .above, relativeTo: nil)
+            container.addSubview(view, positioned: .above, relativeTo: nil)
             window?.makeFirstResponder(view)
             NSAnimationContext.runAnimationGroup { $0.duration = 0.2; view.animator().alphaValue = 1 }
             blocker = view
@@ -134,7 +134,7 @@ private final class BlockerHostView: NSView {
             blocker = nil
             hosting = nil
             NSAnimationContext.runAnimationGroup({ $0.duration = 0.2; old.animator().alphaValue = 0 },
-                                                 completionHandler: { old.removeFromSuperview() })
+                                                 completionHandler: { MainActor.assumeIsolated { old.removeFromSuperview() } })
         }
     }
 }
