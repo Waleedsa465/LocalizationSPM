@@ -77,7 +77,8 @@ public extension PlatformView {
         shimmer: Bool = true,
         breathing: Bool = true,
         scalingEffect: Bool = true,
-        shimmerTimer: TimeInterval = 2.4
+        shimmerTimer: TimeInterval = 2.4,
+        inOutTimer: TimeInterval = 1.08
     ) -> PlatformView {
         let rootView = GradientBackgroundView(
             colors: colors,
@@ -88,7 +89,8 @@ public extension PlatformView {
             shimmer: shimmer,
             breathing: breathing,
             scalingEffect: scalingEffect,
-            shimmerTimer: shimmerTimer
+            shimmerTimer: shimmerTimer,
+            inOutTimer: inOutTimer
         )
         
 #if os(iOS)
@@ -128,7 +130,8 @@ public extension View {
         shimmer: Bool = true,
         breathing: Bool = true,
         scalingEffect: Bool = true,
-        shimmerTimer: TimeInterval = 2.4
+        shimmerTimer: TimeInterval = 2.4,
+        inOutTimer: TimeInterval = 1.08
     ) -> some View {
         modifier(ShimmerEffectModifier(
             colors: colors,
@@ -139,7 +142,8 @@ public extension View {
             shimmer: shimmer,
             breathing: breathing,
             scalingEffect: scalingEffect,
-            shimmerTimer: shimmerTimer
+            shimmerTimer: shimmerTimer,
+            inOutTimer: inOutTimer
         ))
     }
     func dropShadow(
