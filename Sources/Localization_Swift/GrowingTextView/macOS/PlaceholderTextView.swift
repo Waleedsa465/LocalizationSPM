@@ -13,9 +13,30 @@ public protocol PlaceholderTextViewResponderDelegate: AnyObject {
 @IBDesignable
 @MainActor
 open class PlaceholderTextView: NSTextView {
-
-    @IBInspectable public var placeholderString: String = "" {
+    
+    @IBInspectable public var placeholderText: String = "" {
         didSet { needsDisplay = true }
+    }
+    
+    @nonobjc public var placeholderString: String {
+        get { placeholderText }
+        set { placeholderText = newValue }
+    }
+
+    open override func setValue(_ value: Any?, forKey key: String) {
+        if key == "placeholderString" {
+            placeholderText = value as? String ?? ""
+        } else {
+            super.setValue(value, forKey: key)
+        }
+    }
+
+    open override func setValue(_ value: Any?, forKeyPath keyPath: String) {
+        if keyPath == "placeholderString" {
+            placeholderText = value as? String ?? ""
+        } else {
+            super.setValue(value, forKeyPath: keyPath)
+        }
     }
 
     @IBInspectable public var placeholderColor: NSColor = .placeholderTextColor {
@@ -62,8 +83,6 @@ open class PlaceholderTextView: NSTextView {
         invalidatePlaceholder()
     }
 
-    /// Redraws the text view and the views that host it, so the previous (old-language)
-    /// placeholder pixels are not left behind in a cached backing store.
     private func invalidatePlaceholder() {
         needsDisplay = true
         if let scrollView = enclosingScrollView {
@@ -75,7 +94,6 @@ open class PlaceholderTextView: NSTextView {
 
     open override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
-        // A clip view that copies cached bits on scroll can keep drawing the old placeholder.
         enclosingScrollView?.contentView.copiesOnScroll = false
     }
 
@@ -95,7 +113,7 @@ open class PlaceholderTextView: NSTextView {
             dx: textContainerInset.width + textContainerOrigin.x + 5,
             dy: textContainerInset.height + textContainerOrigin.y
         )
-        placeholderString.localized().draw(
+        placeholderText.localized().draw(
             with: placeholderRect,
             options: .usesLineFragmentOrigin,
             attributes: placeholderAttributes
