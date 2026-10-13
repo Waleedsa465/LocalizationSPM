@@ -109,10 +109,18 @@ public extension PlatformView {
         addSubview(observer)
         objc_setAssociatedObject(self, &shadowObserverKey, observer, .OBJC_ASSOCIATION_ASSIGN)
 #elseif os(macOS)
-        let token = observe(\.effectiveAppearance, options: [.new]) { view, _ in
+        // Forcing NSApp.appearance (Light/Dark) notifies the app first, while the view's own
+        // effectiveAppearance is still stale, so re-apply on the next runloop turn as well.
+        let reapply: @Sendable (PlatformView) -> Void = { view in
             MainActor.assumeIsolated { view.applyStoredShadow() }
+            DispatchQueue.main.async { [weak view] in view?.applyStoredShadow() }
         }
-        objc_setAssociatedObject(self, &shadowObserverKey, token, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        let viewToken = observe(\.effectiveAppearance, options: [.new]) { view, _ in reapply(view) }
+        let appToken = NSApp?.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
+            guard let self else { return }
+            DispatchQueue.main.async { [weak self] in self?.applyStoredShadow() }
+        }
+        objc_setAssociatedObject(self, &shadowObserverKey, [viewToken, appToken].compactMap { $0 } as NSArray, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 #endif
     }
 
