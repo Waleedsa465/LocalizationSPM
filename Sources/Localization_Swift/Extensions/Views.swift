@@ -74,6 +74,29 @@ public extension PlatformView {
         return self
     }
 
+    /// Removes the shadow and stops observing theme changes.
+    @discardableResult
+    func removeDropShadow() -> Self {
+        objc_setAssociatedObject(self, &shadowConfigKey, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+#if os(iOS)
+        (objc_getAssociatedObject(self, &shadowObserverKey) as? UIView)?.removeFromSuperview()
+        layer.shadowOpacity = 0
+        layer.shadowRadius = 0
+        layer.shadowOffset = .zero
+        layer.shadowColor = nil
+#elseif os(macOS)
+        layer?.shadowOpacity = 0
+        layer?.shadowRadius = 0
+        layer?.shadowOffset = .zero
+        layer?.shadowColor = nil
+#endif
+        objc_setAssociatedObject(self, &shadowObserverKey, nil, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        return self
+    }
+
+    /// Call from your own theme-change handler to force the shadow to refresh.
+    func refreshDropShadow() { applyStoredShadow() }
+
     fileprivate func applyStoredShadow() {
         guard let config = (objc_getAssociatedObject(self, &shadowConfigKey) as? ShadowConfigBox)?.value else { return }
 #if os(iOS)
