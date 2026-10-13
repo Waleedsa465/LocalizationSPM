@@ -107,7 +107,7 @@ public extension PlatformView {
 #if os(iOS)
         let observer = ShadowTraitObserverView { [weak self] in self?.applyStoredShadow() }
         addSubview(observer)
-        objc_setAssociatedObject(self, &shadowObserverKey, observer, .OBJC_ASSOCIATION_ASSIGN)
+        objc_setAssociatedObject(self, &shadowObserverKey, observer, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 #elseif os(macOS)
         // Forcing NSApp.appearance (Light/Dark) notifies the app first, while the view's own
         // effectiveAppearance is still stale, so re-apply on the next runloop turn as well.
