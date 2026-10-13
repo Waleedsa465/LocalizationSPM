@@ -1,9 +1,51 @@
 import SwiftUI
+import ObjectiveC
 
 #if os(iOS)
 import UIKit
 #elseif os(macOS)
 import AppKit
+#endif
+
+// MARK: - Drop Shadow Support
+private struct ShadowConfig {
+    var color: Color
+    var opacity: Float
+    var darkOpacity: Float?
+    var radius: CGFloat
+    var offset: CGSize
+    var cornerRadius: CGFloat?
+}
+
+private final class ShadowConfigBox {
+    let value: ShadowConfig
+    init(_ value: ShadowConfig) { self.value = value }
+}
+
+nonisolated(unsafe) private var shadowConfigKey: UInt8 = 0
+nonisolated(unsafe) private var shadowObserverKey: UInt8 = 0
+
+#if os(iOS)
+private final class ShadowTraitObserverView: UIView {
+    private let onChange: () -> Void
+
+    init(onChange: @escaping () -> Void) {
+        self.onChange = onChange
+        super.init(frame: .zero)
+        isUserInteractionEnabled = false
+        isAccessibilityElement = false
+        backgroundColor = .clear
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    override func traitCollectionDidChange(_ previous: UITraitCollection?) {
+        super.traitCollectionDidChange(previous)
+        if traitCollection.hasDifferentColorAppearance(comparedTo: previous) {
+            onChange()
+        }
+    }
+}
 #endif
 
 // MARK: - Uikit + AppKit Views Extension
@@ -13,31 +55,65 @@ public extension PlatformView {
     func dropShadow(
         color: Color = .black,
         opacity: Float = 0.2,
+        darkOpacity: Float? = nil,
         radius: CGFloat = 10,
         offset: CGSize = CGSize(width: 0, height: 5),
         cornerRadius: CGFloat? = nil
     ) -> Self {
+        let config = ShadowConfig(
+            color: color,
+            opacity: opacity,
+            darkOpacity: darkOpacity,
+            radius: radius,
+            offset: offset,
+            cornerRadius: cornerRadius
+        )
+        objc_setAssociatedObject(self, &shadowConfigKey, ShadowConfigBox(config), .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        applyStoredShadow()
+        observeAppearanceForShadowIfNeeded()
+        return self
+    }
+
+    fileprivate func applyStoredShadow() {
+        guard let config = (objc_getAssociatedObject(self, &shadowConfigKey) as? ShadowConfigBox)?.value else { return }
 #if os(iOS)
-        layer.shadowColor = UIColor(color).cgColor
-        layer.shadowOpacity = opacity
-        layer.shadowRadius = radius
-        layer.shadowOffset = offset
+        let isDark = traitCollection.userInterfaceStyle == .dark
+        layer.shadowColor = UIColor(config.color).resolvedColor(with: traitCollection).cgColor
+        layer.shadowOpacity = isDark ? (config.darkOpacity ?? config.opacity) : config.opacity
+        layer.shadowRadius = config.radius
+        layer.shadowOffset = config.offset
         layer.masksToBounds = false
-        if let cornerRadius {
+        if let cornerRadius = config.cornerRadius {
             layer.cornerRadius = cornerRadius
         }
 #elseif os(macOS)
         wantsLayer = true
-        layer?.shadowColor = NSColor(color).cgColor
-        layer?.shadowOpacity = opacity
-        layer?.shadowRadius = radius
-        layer?.shadowOffset = CGSize(width: offset.width, height: -offset.height)
+        let isDark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            layer?.shadowColor = NSColor(config.color).cgColor
+        }
+        layer?.shadowOpacity = isDark ? (config.darkOpacity ?? config.opacity) : config.opacity
+        layer?.shadowRadius = config.radius
+        layer?.shadowOffset = CGSize(width: config.offset.width, height: -config.offset.height)
         layer?.masksToBounds = false
-        if let cornerRadius {
+        if let cornerRadius = config.cornerRadius {
             layer?.cornerRadius = cornerRadius
         }
 #endif
-        return self
+    }
+
+    private func observeAppearanceForShadowIfNeeded() {
+        guard objc_getAssociatedObject(self, &shadowObserverKey) == nil else { return }
+#if os(iOS)
+        let observer = ShadowTraitObserverView { [weak self] in self?.applyStoredShadow() }
+        addSubview(observer)
+        objc_setAssociatedObject(self, &shadowObserverKey, observer, .OBJC_ASSOCIATION_ASSIGN)
+#elseif os(macOS)
+        let token = observe(\.effectiveAppearance, options: [.new]) { view, _ in
+            MainActor.assumeIsolated { view.applyStoredShadow() }
+        }
+        objc_setAssociatedObject(self, &shadowObserverKey, token, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+#endif
     }
 
     @discardableResult
