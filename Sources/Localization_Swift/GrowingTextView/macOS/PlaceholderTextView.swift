@@ -15,25 +15,30 @@ public protocol PlaceholderTextViewResponderDelegate: AnyObject {
 open class PlaceholderTextView: NSTextView {
 
     @IBInspectable public var placeholderString: String = "" {
-        didSet { refreshPlaceholder() }
+        didSet { needsDisplay = true }
     }
 
     @IBInspectable public var placeholderColor: NSColor = .placeholderTextColor {
-        didSet { refreshPlaceholder() }
+        didSet { needsDisplay = true }
     }
-
-    private let placeholderLabel: NSTextField = {
-        let label = PassthroughLabel(wrappingLabelWithString: "")
-        label.isSelectable = false
-        label.isEditable = false
-        label.drawsBackground = false
-        label.isBordered = false
-        label.maximumNumberOfLines = 0
-        return label
-    }()
 
     public weak var enterDelegate: PlaceholderTextViewDelegate?
     public weak var responderDelegate: PlaceholderTextViewResponderDelegate?
+
+    // MARK: - Private Helpers
+    private var placeholderAttributes: [NSAttributedString.Key: Any] {
+        return [
+            .foregroundColor: placeholderColor,
+            .font: font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize),
+            .paragraphStyle: currentParagraphStyle
+        ]
+    }
+
+    private var currentParagraphStyle: NSParagraphStyle {
+        let style = NSMutableParagraphStyle()
+        style.alignment = alignment
+        return style
+    }
 
     private let commandKey = NSEvent.ModifierFlags.command.rawValue
     private let commandShiftKey = NSEvent.ModifierFlags.command.rawValue | NSEvent.ModifierFlags.shift.rawValue
@@ -41,67 +46,73 @@ open class PlaceholderTextView: NSTextView {
     // MARK: - Initialisers
     public override init(frame: NSRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
-        setupPlaceholder()
+        observeLanguageChanges()
     }
 
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setupPlaceholder()
+        observeLanguageChanges()
     }
 
-    private func setupPlaceholder() {
-        addSubview(placeholderLabel)
-        refreshPlaceholder()
+    private func observeLanguageChanges() {
         NotificationCenter.default.addObserver(self, selector: #selector(languageDidChange), name: Notification.Name(rawValue: LCLLanguageChangeNotification), object: nil)
     }
 
     @objc private func languageDidChange() {
-        refreshPlaceholder()
+        invalidatePlaceholder()
     }
 
-    private func refreshPlaceholder() {
-        placeholderLabel.stringValue = placeholderString.localized()
-        placeholderLabel.textColor = placeholderColor
-        placeholderLabel.font = font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize)
-        placeholderLabel.alignment = alignment
-        placeholderLabel.isHidden = !string.isEmpty || isFieldEditor
-
-        let dx = textContainerInset.width + textContainerOrigin.x + 5
-        let dy = textContainerInset.height + textContainerOrigin.y
-        let width = max(bounds.width - dx * 2, 0)
-        let height = placeholderLabel.cell?.cellSize(forBounds: NSRect(x: 0, y: 0, width: width, height: .greatestFiniteMagnitude)).height ?? 0
-        placeholderLabel.frame = NSRect(x: dx, y: dy, width: width, height: height)
+    /// Redraws the text view and the views that host it, so the previous (old-language)
+    /// placeholder pixels are not left behind in a cached backing store.
+    private func invalidatePlaceholder() {
+        needsDisplay = true
+        if let scrollView = enclosingScrollView {
+            scrollView.contentView.needsDisplay = true
+            scrollView.needsDisplay = true
+        }
+        layer?.setNeedsDisplay()
     }
 
-    open override func layout() {
-        super.layout()
-        refreshPlaceholder()
-    }
-
-    open override func didChangeText() {
-        super.didChangeText()
-        refreshPlaceholder()
-    }
-
-    open override var string: String {
-        didSet { refreshPlaceholder() }
+    open override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        // A clip view that copies cached bits on scroll can keep drawing the old placeholder.
+        enclosingScrollView?.contentView.copiesOnScroll = false
     }
 
     // MARK: - IBDesignable Preview Support
     open override func prepareForInterfaceBuilder() {
         super.prepareForInterfaceBuilder()
-        Task { @MainActor in refreshPlaceholder() }
+        Task { @MainActor in needsDisplay = true }
+    }
+
+    // MARK: - Drawing
+    open override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
+
+        guard string.isEmpty, !isFieldEditor else { return }
+
+        let placeholderRect = bounds.insetBy(
+            dx: textContainerInset.width + textContainerOrigin.x + 5,
+            dy: textContainerInset.height + textContainerOrigin.y
+        )
+        placeholderString.localized().draw(
+            with: placeholderRect,
+            options: .usesLineFragmentOrigin,
+            attributes: placeholderAttributes
+        )
     }
 
     // MARK: - First Responder
     open override func becomeFirstResponder() -> Bool {
         let success = super.becomeFirstResponder()
+        needsDisplay = true
         responderDelegate?.textViewDidBecomeFirstResponder()
         return success
     }
 
     open override func resignFirstResponder() -> Bool {
         let success = super.resignFirstResponder()
+        needsDisplay = true
         responderDelegate?.textViewDidResignFirstResponder()
         return success
     }
@@ -144,9 +155,5 @@ open class PlaceholderTextView: NSTextView {
 
         return super.performKeyEquivalent(with: event)
     }
-}
-
-private final class PassthroughLabel: NSTextField {
-    override func hitTest(_ point: NSPoint) -> NSView? { nil }
 }
 #endif
