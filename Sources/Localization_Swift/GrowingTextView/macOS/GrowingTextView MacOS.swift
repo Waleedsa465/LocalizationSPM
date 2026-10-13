@@ -109,4 +109,4 @@ extension NSFont {
         return ascender + abs(descender) + leading
     }
 }
-#endif // os(macOS)
+#endif

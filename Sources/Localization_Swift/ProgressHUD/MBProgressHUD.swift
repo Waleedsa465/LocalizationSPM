@@ -287,4 +287,4 @@ final class MBSpinner: NSView {
     }
 }
 
-#endif // os(macOS)
+#endif

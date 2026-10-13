@@ -10,10 +10,7 @@ open class PlaceholderTextView: UITextView {
     private let placeholderLabel: UILabel = UILabel()
     
     @IBInspectable public var placeholder: String? {
-        didSet {
-            placeholderLabel.text = placeholder
-            placeholderLabel.sizeToFit()
-        }
+        didSet { updatePlaceholderText() }
     }
     
     @IBInspectable var placeholderColor: UIColor = UIColor.lightGray {
@@ -63,7 +60,19 @@ open class PlaceholderTextView: UITextView {
         placeholderLabel.isUserInteractionEnabled = false
         placeholderLabel.backgroundColor = .clear
         textDidChange()
+        updatePlaceholderText()
         NotificationCenter.default.addObserver(self, selector: #selector(textDidChange), name: UITextView.textDidChangeNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(languageDidChange), name: Notification.Name(rawValue: LCLLanguageChangeNotification), object: nil)
+    }
+    
+    private func updatePlaceholderText() {
+        placeholderLabel.text = placeholder?.localized()
+        placeholderLabel.sizeToFit()
+        setNeedsLayout()
+    }
+    
+    @objc private func languageDidChange() {
+        updatePlaceholderText()
     }
     
     @objc private func textDidChange() {

@@ -46,10 +46,20 @@ open class PlaceholderTextView: NSTextView {
     // MARK: - Initialisers
     public override init(frame: NSRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
+        observeLanguageChanges()
     }
 
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
+        observeLanguageChanges()
+    }
+
+    private func observeLanguageChanges() {
+        NotificationCenter.default.addObserver(self, selector: #selector(languageDidChange), name: Notification.Name(rawValue: LCLLanguageChangeNotification), object: nil)
+    }
+
+    @objc private func languageDidChange() {
+        needsDisplay = true
     }
 
     // MARK: - IBDesignable Preview Support
@@ -68,7 +78,7 @@ open class PlaceholderTextView: NSTextView {
             dx: textContainerInset.width + textContainerOrigin.x + 5,
             dy: textContainerInset.height + textContainerOrigin.y
         )
-        placeholderString.draw(
+        placeholderString.localized().draw(
             with: placeholderRect,
             options: .usesLineFragmentOrigin,
             attributes: placeholderAttributes
@@ -129,4 +139,4 @@ open class PlaceholderTextView: NSTextView {
         return super.performKeyEquivalent(with: event)
     }
 }
-#endif // os(macOS)
+#endif

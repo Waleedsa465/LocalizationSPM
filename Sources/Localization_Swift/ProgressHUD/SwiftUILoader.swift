@@ -103,8 +103,6 @@ public struct LoaderModifier: ViewModifier {
             )
     }
     #else
-    // macOS: a plain SwiftUI overlay. Adding views to the window hierarchy from an NSViewRepresentable
-    // is unsupported inside NSHostingController (AppKit warns and the view may not appear).
     public func body(content: Content) -> some View {
         content
             .disabled(isLoading)

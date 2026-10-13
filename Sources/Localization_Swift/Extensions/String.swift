@@ -30,16 +30,22 @@ public extension String {
         NSString.localizedStringWithFormat(localized(using: tableName) as NSString, argument) as String
     }
     func localized(using tableName: String?, in bundle: Bundle?) -> String {
+        lookupLocalization(using: tableName, in: bundle, fallback: nil) ?? self
+    }
+    func hasLocalization(using tableName: String? = nil, in bundle: Bundle? = nil) -> Bool {
+        lookupLocalization(using: tableName, in: bundle, fallback: "\u{0}") != "\u{0}"
+    }
+    private func lookupLocalization(using tableName: String?, in bundle: Bundle?, fallback: String?) -> String? {
         let bundle: Bundle = bundle ?? .main
         if let path = bundle.path(forResource: Localize.currentLanguage(), ofType: "lproj"),
            let bundle = Bundle(path: path) {
-            return bundle.localizedString(forKey: self, value: nil, table: tableName)
+            return bundle.localizedString(forKey: self, value: fallback, table: tableName)
         }
         else if let path = bundle.path(forResource: LCLBaseBundle, ofType: "lproj"),
                 let bundle = Bundle(path: path) {
-            return bundle.localizedString(forKey: self, value: nil, table: tableName)
+            return bundle.localizedString(forKey: self, value: fallback, table: tableName)
         }
-        return self
+        return fallback
     }
     func localizedFormat(arguments: CVarArg..., using tableName: String?, in bundle: Bundle?) -> String {
         String(format: localized(using: tableName, in: bundle), arguments: arguments)
