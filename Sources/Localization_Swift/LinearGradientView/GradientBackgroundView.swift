@@ -10,6 +10,7 @@ public struct GradientBackgroundView: View {
     var cornerRadius: CGFloat = 12
     var shimmerTimer: TimeInterval = 2.4
     var inOutTimer: TimeInterval = 1.08
+    var shimmerBlendMode: BlendMode = .overlay
 
     var shimmer: Bool = true
     var breathing: Bool = true
@@ -32,7 +33,8 @@ public struct GradientBackgroundView: View {
         breathing: Bool = true,
         scalingEffect: Bool = true,
         shimmerTimer: TimeInterval = 2.4,
-        inOutTimer: TimeInterval = 1.08
+        inOutTimer: TimeInterval = 1.08,
+        shimmerBlendMode: BlendMode = .overlay
     ) {
         self.colors = colors
         self.shimmerColors = shimmerColors
@@ -44,6 +46,7 @@ public struct GradientBackgroundView: View {
         self.scalingEffect = scalingEffect
         self.shimmerTimer = shimmerTimer
         self.inOutTimer = inOutTimer
+        self.shimmerBlendMode = shimmerBlendMode
     }
     
     private var currentScale: CGFloat {
@@ -71,7 +74,7 @@ public struct GradientBackgroundView: View {
                             .frame(width: radius * 2, height: radius * 2)
                             .position(x: geo.size.width / 2, y: geo.size.height / 2)
                             .opacity(1.0 - Double(shimmerPulse))
-                            .blendMode(.overlay)
+                            .blendMode(shimmerBlendMode)
                             .allowsHitTesting(false)
                     }
                 }
@@ -110,6 +113,7 @@ public struct ShimmerEffectModifier: ViewModifier {
     var scalingEffect: Bool
     var shimmerTimer: TimeInterval
     var inOutTimer: TimeInterval
+    var shimmerBlendMode: BlendMode
 
     public func body(content: Content) -> some View {
         content.background {
@@ -123,7 +127,8 @@ public struct ShimmerEffectModifier: ViewModifier {
                 breathing: breathing,
                 scalingEffect: scalingEffect,
                 shimmerTimer: shimmerTimer,
-                inOutTimer: inOutTimer
+                inOutTimer: inOutTimer,
+                shimmerBlendMode: shimmerBlendMode
             )
         }
     }
