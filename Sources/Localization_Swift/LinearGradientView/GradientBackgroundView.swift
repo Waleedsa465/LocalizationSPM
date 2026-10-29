@@ -62,11 +62,7 @@ public struct GradientBackgroundView: View {
                         Circle()
                             .fill(
                                 RadialGradient(
-                                    colors: [
-                                        .white.opacity(0.35),
-                                        .white.opacity(0.0),
-                                        .white.opacity(0.18),
-                                    ],
+                                    colors: shimmerColors,
                                     center: .center,
                                     startRadius: 0,
                                     endRadius: radius
