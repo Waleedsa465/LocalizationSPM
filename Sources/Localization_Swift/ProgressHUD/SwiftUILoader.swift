@@ -5,7 +5,6 @@ import UIKit
 import AppKit
 #endif
 
-// MARK: - Loader card
 private struct LoaderCard: View {
     var message: String?
     var tint: Color
@@ -38,11 +37,6 @@ private final class BlockerHostView: UIView {
     private var blocker: WindowBlockerView?
     private var hosting: UIHostingController<LoaderCard>?
     
-    #if targetEnvironment(macCatalyst)
-    private var lockedBars: [UINavigationBar] = []
-    private var lockedToolbarItems: [NSToolbarItem] = []
-    #endif
-    
     struct Config: Equatable {
         var isBlocking = false
         var message: String?
@@ -52,32 +46,30 @@ private final class BlockerHostView: UIView {
     
     override func didMoveToWindow() { super.didMoveToWindow(); sync() }
     
-    #if targetEnvironment(macCatalyst)
-    private func navigationBars(in view: UIView) -> [UINavigationBar] {
-        var result: [UINavigationBar] = []
-        if let bar = view as? UINavigationBar { result.append(bar) }
-        for sub in view.subviews { result += navigationBars(in: sub) }
-        return result
-    }
-    
-    private func lockChrome(in window: UIWindow) {
-        guard lockedBars.isEmpty, lockedToolbarItems.isEmpty else { return }
-        lockedBars = navigationBars(in: window).filter { $0.isUserInteractionEnabled }
-        lockedBars.forEach { $0.isUserInteractionEnabled = false }
-        if let items = window.windowScene?.titlebar?.toolbar?.items {
-            lockedToolbarItems = items.filter { $0.isEnabled }
-            lockedToolbarItems.forEach { $0.isEnabled = false }
+#if targetEnvironment(macCatalyst)
+    private func sync() {
+        if config.isBlocking, let window {
+            let card = LoaderCard(message: config.message, tint: config.tint)
+            if let hosting {
+                hosting.rootView = card
+                return
+            }
+            let host = UIHostingController(rootView: card)
+            host.modalPresentationStyle = .formSheet
+            host.preferredContentSize = CGSize(width: 220, height: 160)
+            host.isModalInPresentation = true
+            hosting = host
+            var top = window.rootViewController
+            while let next = top?.presentedViewController { top = next }
+            top?.present(host, animated: true) { [weak self, weak host] in
+                if self?.hosting == nil { host?.dismiss(animated: true) }
+            }
+        } else if let host = hosting {
+            hosting = nil
+            host.dismiss(animated: true)
         }
     }
-    
-    private func unlockChrome() {
-        lockedBars.forEach { $0.isUserInteractionEnabled = true }
-        lockedToolbarItems.forEach { $0.isEnabled = true }
-        lockedBars = []
-        lockedToolbarItems = []
-    }
-    #endif
-    
+#else
     private func sync() {
         if config.isBlocking, let window {
             let card = LoaderCard(message: config.message, tint: config.tint)
@@ -99,18 +91,13 @@ private final class BlockerHostView: UIView {
             UIView.animate(withDuration: 0.2) { view.alpha = 1 }
             blocker = view
             hosting = host
-            #if targetEnvironment(macCatalyst)
-            lockChrome(in: window)
-            #endif
         } else if let old = blocker {
             blocker = nil
             hosting = nil
-            #if targetEnvironment(macCatalyst)
-            unlockChrome()
-            #endif
             UIView.animate(withDuration: 0.2, animations: { old.alpha = 0 }) { _ in old.removeFromSuperview() }
         }
     }
+#endif
 }
 
 private struct WindowBlocker: UIViewRepresentable {
@@ -127,7 +114,7 @@ public struct LoaderModifier: ViewModifier {
     var tint: Color
     var dimOpacity: Double
     
-    #if os(iOS)
+#if os(iOS)
     public func body(content: Content) -> some View {
         content
             .disabled(isLoading)
@@ -136,7 +123,7 @@ public struct LoaderModifier: ViewModifier {
                                             dimOpacity: dimOpacity, tint: tint))
             )
     }
-    #else
+#else
     public func body(content: Content) -> some View {
         content
             .disabled(isLoading)
@@ -153,7 +140,7 @@ public struct LoaderModifier: ViewModifier {
             }
             .animation(.easeInOut(duration: 0.2), value: isLoading)
     }
-    #endif
+#endif
 }
 
 public extension View {
