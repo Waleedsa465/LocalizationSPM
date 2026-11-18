@@ -6,7 +6,6 @@ import AppKit
 #endif
 
 // MARK: - Loader card
-
 private struct LoaderCard: View {
     var message: String?
     var tint: Color
@@ -39,6 +38,11 @@ private final class BlockerHostView: UIView {
     private var blocker: WindowBlockerView?
     private var hosting: UIHostingController<LoaderCard>?
     
+    #if targetEnvironment(macCatalyst)
+    private var lockedBars: [UINavigationBar] = []
+    private var lockedToolbarItems: [NSToolbarItem] = []
+    #endif
+    
     struct Config: Equatable {
         var isBlocking = false
         var message: String?
@@ -47,6 +51,32 @@ private final class BlockerHostView: UIView {
     }
     
     override func didMoveToWindow() { super.didMoveToWindow(); sync() }
+    
+    #if targetEnvironment(macCatalyst)
+    private func navigationBars(in view: UIView) -> [UINavigationBar] {
+        var result: [UINavigationBar] = []
+        if let bar = view as? UINavigationBar { result.append(bar) }
+        for sub in view.subviews { result += navigationBars(in: sub) }
+        return result
+    }
+    
+    private func lockChrome(in window: UIWindow) {
+        guard lockedBars.isEmpty, lockedToolbarItems.isEmpty else { return }
+        lockedBars = navigationBars(in: window).filter { $0.isUserInteractionEnabled }
+        lockedBars.forEach { $0.isUserInteractionEnabled = false }
+        if let items = window.windowScene?.titlebar?.toolbar?.items {
+            lockedToolbarItems = items.filter { $0.isEnabled }
+            lockedToolbarItems.forEach { $0.isEnabled = false }
+        }
+    }
+    
+    private func unlockChrome() {
+        lockedBars.forEach { $0.isUserInteractionEnabled = true }
+        lockedToolbarItems.forEach { $0.isEnabled = true }
+        lockedBars = []
+        lockedToolbarItems = []
+    }
+    #endif
     
     private func sync() {
         if config.isBlocking, let window {
@@ -69,9 +99,15 @@ private final class BlockerHostView: UIView {
             UIView.animate(withDuration: 0.2) { view.alpha = 1 }
             blocker = view
             hosting = host
+            #if targetEnvironment(macCatalyst)
+            lockChrome(in: window)
+            #endif
         } else if let old = blocker {
             blocker = nil
             hosting = nil
+            #if targetEnvironment(macCatalyst)
+            unlockChrome()
+            #endif
             UIView.animate(withDuration: 0.2, animations: { old.alpha = 0 }) { _ in old.removeFromSuperview() }
         }
     }
@@ -84,8 +120,6 @@ private struct WindowBlocker: UIViewRepresentable {
     static func dismantleUIView(_ view: BlockerHostView, coordinator: ()) { view.config.isBlocking = false }
 }
 #endif
-
-// MARK: - Modifier
 
 public struct LoaderModifier: ViewModifier {
     @Binding var isLoading: Bool
