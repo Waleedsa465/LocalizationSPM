@@ -8,9 +8,10 @@ import AppKit
 private struct LoaderCard: View {
     var message: String?
     var tint: Color
+    var fillsSpace = true
     
     var body: some View {
-        VStack(spacing: 12) {
+        let card = VStack(spacing: 12) {
             ProgressView()
                 .progressViewStyle(.circular)
                 .tint(tint)
@@ -21,9 +22,14 @@ private struct LoaderCard: View {
                     .foregroundColor(.secondary)
             }
         }
-        .padding(24)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(24)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+        
+        if fillsSpace {
+            card.frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            card
+        }
     }
 }
 
@@ -49,15 +55,19 @@ private final class BlockerHostView: UIView {
 #if targetEnvironment(macCatalyst)
     private func sync() {
         if config.isBlocking, let window {
-            let card = LoaderCard(message: config.message, tint: config.tint)
+            let card = LoaderCard(message: config.message, tint: config.tint, fillsSpace: false)
             if let hosting {
                 hosting.rootView = card
                 return
             }
             let host = UIHostingController(rootView: card)
+            if #available(iOS 16.0, *) {
+                host.sizingOptions = [.preferredContentSize]
+            } else {
+                host.preferredContentSize = host.sizeThatFits(in: CGSize(width: 320, height: CGFloat.greatestFiniteMagnitude))
+            }
             host.view.backgroundColor = .clear
             host.modalPresentationStyle = .formSheet
-            host.preferredContentSize = CGSize(width: 140, height: 140)
             host.isModalInPresentation = true
             hosting = host
             var top = window.rootViewController
