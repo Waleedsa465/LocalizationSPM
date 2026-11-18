@@ -37,6 +37,10 @@ private final class BlockerHostView: UIView {
     private var blocker: WindowBlockerView?
     private var hosting: UIHostingController<LoaderCard>?
     
+    #if targetEnvironment(macCatalyst)
+    private var loaderWindow: UIWindow?
+    #endif
+    
     struct Config: Equatable {
         var isBlocking = false
         var message: String?
@@ -46,31 +50,43 @@ private final class BlockerHostView: UIView {
     
     override func didMoveToWindow() { super.didMoveToWindow(); sync() }
     
-#if targetEnvironment(macCatalyst)
+    #if targetEnvironment(macCatalyst)
     private func sync() {
-        if config.isBlocking, let window {
+        if config.isBlocking, let scene = window?.windowScene {
             let card = LoaderCard(message: config.message, tint: config.tint)
             if let hosting {
                 hosting.rootView = card
+                loaderWindow?.rootViewController?.view.backgroundColor = UIColor.black.withAlphaComponent(config.dimOpacity)
                 return
             }
+            let blockerView = WindowBlockerView()
+            blockerView.backgroundColor = UIColor.black.withAlphaComponent(config.dimOpacity)
+            let container = UIViewController()
+            container.view = blockerView
             let host = UIHostingController(rootView: card)
-            host.preferredContentSize = .init(width: 64, height: 64)
             host.view.backgroundColor = .clear
-            host.modalPresentationStyle = .formSheet
-            host.isModalInPresentation = true
+            host.view.frame = blockerView.bounds
+            host.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            container.addChild(host)
+            blockerView.addSubview(host.view)
+            host.didMove(toParent: container)
+            let loader = UIWindow(windowScene: scene)
+            loader.windowLevel = .alert + 1
+            loader.backgroundColor = .clear
+            loader.rootViewController = container
+            loader.alpha = 0
+            loader.isHidden = false
+            UIView.animate(withDuration: 0.2) { loader.alpha = 1 }
+            loaderWindow = loader
             hosting = host
-            var top = window.rootViewController
-            while let next = top?.presentedViewController { top = next }
-            top?.present(host, animated: false) { [weak self, weak host] in
-                if self?.hosting == nil { host?.dismiss(animated: false) }
-            }
-        } else if let host = hosting {
+        } else if let loader = loaderWindow {
+            loaderWindow = nil
             hosting = nil
-            host.dismiss(animated: false)
+            loader.isHidden = true
+            loader.rootViewController = nil
         }
     }
-#else
+    #else
     private func sync() {
         if config.isBlocking, let window {
             let card = LoaderCard(message: config.message, tint: config.tint)
@@ -98,7 +114,7 @@ private final class BlockerHostView: UIView {
             UIView.animate(withDuration: 0.2, animations: { old.alpha = 0 }) { _ in old.removeFromSuperview() }
         }
     }
-#endif
+    #endif
 }
 
 private struct WindowBlocker: UIViewRepresentable {
@@ -115,7 +131,7 @@ public struct LoaderModifier: ViewModifier {
     var tint: Color
     var dimOpacity: Double
     
-#if os(iOS)
+    #if os(iOS)
     public func body(content: Content) -> some View {
         content
             .disabled(isLoading)
@@ -124,7 +140,7 @@ public struct LoaderModifier: ViewModifier {
                                             dimOpacity: dimOpacity, tint: tint))
             )
     }
-#else
+    #else
     public func body(content: Content) -> some View {
         content
             .disabled(isLoading)
@@ -141,7 +157,7 @@ public struct LoaderModifier: ViewModifier {
             }
             .animation(.easeInOut(duration: 0.2), value: isLoading)
     }
-#endif
+    #endif
 }
 
 public extension View {
