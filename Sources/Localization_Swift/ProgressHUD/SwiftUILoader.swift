@@ -55,8 +55,9 @@ private final class BlockerHostView: UIView {
                 return
             }
             let host = UIHostingController(rootView: card)
+            host.view.backgroundColor = .clear
             host.modalPresentationStyle = .formSheet
-            host.preferredContentSize = CGSize(width: 220, height: 160)
+            host.preferredContentSize = CGSize(width: 140, height: 140)
             host.isModalInPresentation = true
             hosting = host
             var top = window.rootViewController
