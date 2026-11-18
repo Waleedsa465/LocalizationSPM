@@ -62,12 +62,12 @@ private final class BlockerHostView: UIView {
             hosting = host
             var top = window.rootViewController
             while let next = top?.presentedViewController { top = next }
-            top?.present(host, animated: true) { [weak self, weak host] in
-                if self?.hosting == nil { host?.dismiss(animated: true) }
+            top?.present(host, animated: false) { [weak self, weak host] in
+                if self?.hosting == nil { host?.dismiss(animated: false) }
             }
         } else if let host = hosting {
             hosting = nil
-            host.dismiss(animated: true)
+            host.dismiss(animated: false)
         }
     }
 #else
