@@ -1,6 +1,24 @@
 # Localization_Swift
 
-A Swift Package with localization utilities plus a grab-bag of UIKit/AppKit/SwiftUI helpers: an animated gradient/shimmer background, a SwiftUI loader and progress HUD, iOS/macOS toasts, a growing text view, proxy monitoring, color helpers, and common Foundation/UIKit/AppKit extensions.
+A Swift Package with runtime localization utilities plus a grab-bag of UIKit/AppKit/SwiftUI helpers for iOS and macOS.
+
+## What's inside
+
+| Area | Highlights | iOS | macOS |
+|---|---|:-:|:-:|
+| **Localization** | `Localized()`, `String.localized()`, runtime language switching, view-hierarchy localization, SwiftUI live refresh (`observeLocalization()`) | ✅ | ✅ |
+| **Before/After slider** | `BeforeAfterSliderView` with draggable divider and configurable badge positions (`.bottom`, `.top`, `.custom`) | ✅ | ✅ |
+| **Gradient & shimmer** | `GradientBackgroundView`, `addShimmerAndBreathingEffect` | ✅ | ✅ |
+| **Loader / HUD** | `.loader(isLoading:)` interaction-blocking loader, `ProgressHudUtility`, `.progressHUD` | ✅ | ✅ |
+| **Toasts** | Queued toast system (iOS), `ToastWindowController` (macOS) | ✅ | ✅ |
+| **GrowingTextView** | Auto-growing text input with placeholder | ✅ | ✅ |
+| **Network monitoring** | `NetworkManager` (Wi-Fi / Ethernet / other / offline + notification) | ✅ | ✅ |
+| **Proxy monitoring** | `ProxyMonitor` | – | ✅ |
+| **Colors** | Hex init / `hexString` for `Color`, `UIColor`, `NSColor` | ✅ | ✅ |
+| **Drop shadow & hosting** | `dropShadow`, `addHostedView`, `embedGradientBackground` | ✅ | ✅ |
+| **Cross-platform aliases** | `PlatformImage`, `PlatformColor`, `PlatformView`, … | ✅ | ✅ |
+| **Extensions** | `String`, `Array`, `URL`, `Bundle`, `Encodable`, `PlatformImage`, `NSItemProvider`, view controllers, table views | ✅ | ✅ |
+| **macOS helpers** | `DraggableImageView` + Quick Look, `NonClickableView`, `NoArrowKeysCollectionView` | – | ✅ |
 
 - **Platforms:** iOS 15+, macOS 12+
 - **Swift tools version:** 6.0
@@ -71,6 +89,15 @@ NotificationCenter.default.addObserver(
 }
 ```
 
+### SwiftUI live language refresh
+
+```swift
+ContentView()
+    .observeLocalization()          // re-renders when the language changes
+
+Text(localized: "welcome_message")  // Text initializer using the current language
+```
+
 ### Localizing a whole view hierarchy (iOS)
 
 Tag views with a localization key using `accessibilityIdentifier`/`restorationIdentifier` conventions expected by `LocalizationUtility`, then:
@@ -138,6 +165,53 @@ SomeView().progressHUD(isShowing: $isShowing)
 ```
 
 Prefer `.loader(isLoading:)` when you also need to block interaction.
+
+### BeforeAfterSliderView
+
+A draggable before/after image comparison, on both iOS and macOS. Pass `UIImage` on iOS and `NSImage` on macOS (both are `PlatformImage`).
+
+```swift
+BeforeAfterSliderView(beforeImage: before, afterImage: after)
+    .frame(height: 300)
+```
+
+All parameters except the two images are optional:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `beforeTitle` / `afterTitle` | `"Before".localized()` / `"After".localized()` | Badge text |
+| `initialPosition` | `0.5` | Starting divider position, `0...1` |
+| `cornerRadius` | `24` | Corner radius of the whole view |
+| `badgeColor` | `.black.opacity(0.55)` | Badge background |
+| `badgePosition` | `.bottom` | Where the badges sit (see below) |
+
+#### Badge position (`BeforeAfterBadgePosition`)
+
+```swift
+// Bottom corners (default): Before bottom-left, After bottom-right
+BeforeAfterSliderView(beforeImage: before, afterImage: after, badgePosition: .bottom)
+
+// Top corners: Before top-left, After top-right
+BeforeAfterSliderView(beforeImage: before, afterImage: after, badgePosition: .top)
+
+// Custom
+BeforeAfterSliderView(
+    beforeImage: before,
+    afterImage: after,
+    badgePosition: .custom(
+        before: UnitPoint(x: 0.2, y: 0.5),
+        after: UnitPoint(x: 0.8, y: 0.5)
+    )
+)
+```
+
+For `.custom(before:after:)` you provide **two `UnitPoint`s**, one for each badge. Each point is where that badge's **center** is placed, relative to the view's size:
+
+- `x`: `0` = left edge, `1` = right edge
+- `y`: `0` = top edge, `1` = bottom edge
+- e.g. `UnitPoint(x: 0.5, y: 0.1)` = horizontally centered, near the top. `.center`, `.top`, `.bottomLeading` etc. also work.
+
+Because the point is the badge's center, keep values away from `0`/`1` (e.g. `0.1…0.9`) so the badge isn't clipped by the edge.
 
 ### Drop shadow
 
@@ -216,6 +290,20 @@ textView.placeholder = "Type a message..."
 
 // macOS
 let scrollView = GrowingTextScrollView()
+```
+
+## Network monitoring
+
+```swift
+NetworkManager.shared.start()
+
+NetworkManager.shared.isConnected    // Bool
+NetworkManager.shared.status         // .wifi, .ethernet, .other, .disconnected
+NetworkManager.shared.isExpensive    // cellular / hotspot
+
+NotificationCenter.default.addObserver(
+    forName: .networkStatusChanged, object: nil, queue: .main
+) { _ in /* react to connectivity change */ }
 ```
 
 ## Proxy monitoring (macOS)

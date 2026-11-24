@@ -6,6 +6,17 @@ import UIKit
 import AppKit
 #endif
 
+/// Where the "Before" / "After" badges are placed.
+public enum BeforeAfterBadgePosition: Equatable, Sendable {
+    /// Badges at the bottom corners (default): Before bottom-left, After bottom-right.
+    case bottom
+    /// Badges at the top corners: Before top-left, After top-right.
+    case top
+    /// Badge centers at a relative point inside the view, where `(0, 0)` is the
+    /// top-left and `(1, 1)` is the bottom-right. Example: `UnitPoint(x: 0.2, y: 0.5)`.
+    case custom(before: UnitPoint, after: UnitPoint)
+}
+
 public struct BeforeAfterSliderView: View {
 
     // MARK: - Variables
@@ -15,6 +26,7 @@ public struct BeforeAfterSliderView: View {
     let afterTitle: String
     let cornerRadius: CGFloat
     let badgeColor: Color
+    let badgePosition: BeforeAfterBadgePosition
 
     @State private var sliderPosition: CGFloat
     @State private var isDragging = false
@@ -28,7 +40,8 @@ public struct BeforeAfterSliderView: View {
         afterTitle: String = "After".localized(),
         initialPosition: CGFloat = 0.5,
         cornerRadius: CGFloat = 24,
-        badgeColor: Color = Color.black.opacity(0.55)
+        badgeColor: Color = Color.black.opacity(0.55),
+        badgePosition: BeforeAfterBadgePosition = .bottom
     ) {
         self.beforeImage = beforeImage
         self.afterImage = afterImage
@@ -36,6 +49,7 @@ public struct BeforeAfterSliderView: View {
         self.afterTitle = afterTitle
         self.cornerRadius = cornerRadius
         self.badgeColor = badgeColor
+        self.badgePosition = badgePosition
         let start = min(max(initialPosition, 0), 1)
         _sliderPosition = State(initialValue: start)
         _dragStartPosition = State(initialValue: start)
@@ -55,7 +69,7 @@ public struct BeforeAfterSliderView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: width, height: height)
                     labelBadge(afterTitle)
-                        .position(x: width - 50, y: height - 32)
+                        .position(badgePoint(isBefore: false, width: width, height: height))
                 }
                 .frame(width: width, height: height)
                 .clipped()
@@ -66,7 +80,7 @@ public struct BeforeAfterSliderView: View {
                         .aspectRatio(contentMode: .fill)
                         .frame(width: width, height: height)
                     labelBadge(beforeTitle)
-                        .position(x: 60, y: height - 32)
+                        .position(badgePoint(isBefore: true, width: width, height: height))
                 }
                 .frame(width: width, height: height)
                 .clipped()
@@ -89,6 +103,19 @@ public struct BeforeAfterSliderView: View {
 
 // MARK: - Helpers
 extension BeforeAfterSliderView {
+
+    func badgePoint(isBefore: Bool, width: CGFloat, height: CGFloat) -> CGPoint {
+        let x = isBefore ? 60 : width - 50
+        switch badgePosition {
+        case .bottom:
+            return CGPoint(x: x, y: height - 32)
+        case .top:
+            return CGPoint(x: x, y: 32)
+        case .custom(let before, let after):
+            let point = isBefore ? before : after
+            return CGPoint(x: width * point.x, y: height * point.y)
+        }
+    }
 
     func platformImage(_ image: PlatformImage) -> Image {
         #if os(iOS)
